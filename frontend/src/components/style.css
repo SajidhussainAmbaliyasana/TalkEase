@@ -1,0 +1,114 @@
+@import url('https://fonts.googleapis.com/css2?family=Poetsen+One&display=swap');
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.app{
+    height: auto;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.alert {
+    position: fixed;
+    right: 2rem;
+    bottom: 3rem;
+
+
+}
+
+.homepage{
+    height: auto;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: "Poetsen One", sans-serif;
+}
+
+.login-box{
+    height: auto;
+    width: 40%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding: 1rem;
+    margin: 1rem 0rem;
+    border-radius: 27px;
+    background: #e0e0e0;
+    box-shadow: 23px 23px 46px #b8b8b8,
+        -23px -23px 46px #ffffff;
+    
+}
+
+.logo{
+    height: 10rem;
+    width: 80%;
+}
+
+.logo img{
+    height: 100%;
+    width: 100%;
+}
+
+.home-navigation{
+    height: auto;
+    width: 100%;
+    margin-top: 1rem;
+    /* border: 1px solid black; */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.home-tab{
+    height: auto;
+    width: 45%;
+    text-align: center;
+    font-size: 1.5rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    color: #459ebe;
+    padding: 0.5rem;
+}
+
+.home-tab-active{
+    background: #b0e57c;
+    height: auto;
+    width: 45%;
+    text-align: center;
+    font-size: 1.5rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    color: #459ebe;
+    padding: 0.5rem;
+}
+
+.login-form{
+    /* border: 1px solid black; */
+    margin-top: 2rem;
+    width: 90%;
+    height: auto;
+    /* display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column; */
+}
+
+.login-input{
+    margin-bottom: 1rem !important;
+}
+
+.login-btn{
+    margin-bottom: 1rem !important;
+    width: 100%;
+    font-family: "Poetsen One", sans-serif !important; 
+    font-size: 1.5rem !important;
+}
