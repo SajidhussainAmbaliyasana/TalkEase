@@ -15,6 +15,9 @@ app.use('/uploads', express.static(__dirname+'/uploads'));
 
 //routes
 app.use('/api/user',require('./routes/UserRoutes'));
+app.use('/api/message', require('./routes/MessageRoutes'));
+app.use('/api/profile',require('./routes/Profile'))
+
 
 
 app.listen(port,()=>{

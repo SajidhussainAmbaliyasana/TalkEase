@@ -112,3 +112,41 @@
     font-family: "Poetsen One", sans-serif !important; 
     font-size: 1.5rem !important;
 }
+
+.navbar{
+    height: 5.5rem;
+    width: 100%;
+    /* border: 1px solid red; */
+    display: flex;
+    position: sticky;
+    top: 0;
+    background: #8ca484bf;
+    align-items: center;
+    padding: 0.5rem;
+}
+
+.no-nav{
+    display: none;
+}
+
+.image-box{
+    height: 98%;
+    width: 15%;
+    margin-left: 1rem;
+}
+
+.image-box img{
+    height: 100%;
+    width: 100%;
+}
+
+.nav-btn-box{
+    height: 100%;
+    width: 35%;
+    /* border: 1px solid red; */
+    margin-left: auto;
+    margin-right: 3rem;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+}

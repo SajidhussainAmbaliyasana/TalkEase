@@ -3,7 +3,7 @@ import React, { useEffect } from 'react'
 import {useDispatch,useSelector} from 'react-redux'
 import { setAlert } from '../store/slices/AlertSlice'
 import { useNavigate } from 'react-router-dom'
-import { removeUser ,fetchUser} from '../store/slices/UserSlice'
+import { fetchUser} from '../store/slices/UserSlice'
 
 
 
@@ -50,21 +50,11 @@ const Homepage = () => {
   },[])
 
 
-  const handelLogout = ()=>{
-    navigate('/');
-    dispatch(removeUser());
-    localStorage.removeItem('authToken');
-    const alertMessage = {
-      message:"Successfully Logged Out",
-      type:"success"
-    }  
-    dispatch(setAlert(alertMessage));
-  }
+
 
   return (
     <div>
       <p>homepage</p>
-      <Button onClick={handelLogout}>Logout</Button>
       {user.isLoading && <p>Loading....</p>}
     </div>
   )

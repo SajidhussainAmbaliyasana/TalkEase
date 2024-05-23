@@ -138,7 +138,28 @@ router.post('/fetch',checkUser,async(req,res)=>{
 })
 
 
+//this route is to fetch the users
+router.get('/find',checkUser,async(req,res)=>{
+    try {
+        const name = req.query.name ? req.query.name :"";
+        const email = req.query.email? req.query.email:"";
 
+        const id = req.user
+
+        //to find the user but not the user who is logged in
+        const findUSers = await User.find({"$or":[{"name":{"$regex":name}}, {"email":{"$regex":email}},], "id":{"$ne":id}}).select("-password");
+
+
+        if(!findUSers){
+            return res.status(500).json({"message":"Some Error Occured","success":false})
+        }
+
+        return res.status(200).json({"data":findUSers,"success":true})
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({"message":"Internal Server Error","success":false});
+    }
+})
 
 
 module.exports = router;
