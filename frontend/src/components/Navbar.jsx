@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
-import './style.css'
-import logo from '../assets/fullLogo.png'
-import { IconButton, Tooltip,Avatar } from '@mui/material'
+import React, { useState } from 'react';
+import './style.css';
+import logo from '../assets/fullLogo.png';
+import { IconButton, Tooltip, Avatar } from '@mui/material';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import NotificationsActiveRoundedIcon from '@mui/icons-material/NotificationsActiveRounded';
 import PeopleOutlineRoundedIcon from '@mui/icons-material/PeopleOutlineRounded';
@@ -12,47 +12,53 @@ import { setAlert } from '../store/slices/AlertSlice';
 import { removeUser } from '../store/slices/UserSlice';
 
 const Navbar = () => {
-
   const location = useLocation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const [addGroup, setAddGroup] = useState(false);
-  const [addFriend, setAddFriend] = useState(false);
-  const [notification, setNotification] = useState(false);
-
-  const user = useSelector((state)=>{return state.user})
+  const user = useSelector((state) => state.user);
 
   const handelLogout = () => {
     navigate('/');
     dispatch(removeUser());
     localStorage.removeItem('authToken');
     const alertMessage = {
-      message: "Successfully Logged Out",
-      type: "success"
-    }
+      message: 'Successfully Logged Out',
+      type: 'success',
+    };
     dispatch(setAlert(alertMessage));
-  }
+  };
 
   return (
-    <>
-      <div className={location.pathname === '/' ? "no-nav" : "navbar"} >
-        <div className="image-box">
-          <img src={logo} alt="logo" />
-        </div>
-        <div className="nav-btn-box">
-          <Tooltip title="Create Group"> <IconButton> <AddRoundedIcon /> </IconButton></Tooltip>
-          <Tooltip title="Add Friend"><IconButton> <PeopleOutlineRoundedIcon /> </IconButton></Tooltip>
-          <Tooltip title="Notification"><IconButton><NotificationsActiveRoundedIcon /></IconButton></Tooltip>
-          <Tooltip title="Logout">  <IconButton onClick={handelLogout}><LogoutRoundedIcon /></IconButton></Tooltip>
-          <Tooltip title="Profile"><Avatar alt={user.data.name} src="/stg" /></Tooltip>
-
-
-        </div>
+    <div className={location.pathname === '/' ? 'no-nav' : 'navbar'}>
+      <div className="image-box">
+        <img src={logo} alt="logo" />
       </div>
-    </>
+      <div className="nav-btn-box">
+        <Tooltip title="Create Group">
+          <IconButton>
+            <AddRoundedIcon />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Add Friend">
+          <IconButton>
+            <PeopleOutlineRoundedIcon />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Notification">
+          <IconButton>
+            <NotificationsActiveRoundedIcon />
+          </IconButton>
+        </Tooltip>
+         <IconButton onClick={handelLogout}>
+            <LogoutRoundedIcon />
+          </IconButton>
+        <Tooltip title="Profile">
+          <Avatar alt={user.data.name} src="/stg" />
+        </Tooltip>
+      </div>
+    </div>
+  );
+};
 
-  )
-}
-
-export default Navbar
+export default Navbar;
