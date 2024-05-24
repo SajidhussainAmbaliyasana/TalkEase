@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import './style.css';
 import logo from '../assets/fullLogo.png';
-import { IconButton, Tooltip, Avatar } from '@mui/material';
+import { IconButton, Tooltip, Avatar, Skeleton } from '@mui/material';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import NotificationsActiveRoundedIcon from '@mui/icons-material/NotificationsActiveRounded';
 import PeopleOutlineRoundedIcon from '@mui/icons-material/PeopleOutlineRounded';
@@ -10,6 +10,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { setAlert } from '../store/slices/AlertSlice';
 import { removeUser } from '../store/slices/UserSlice';
+
 
 const Navbar = () => {
   const location = useLocation();
@@ -50,11 +51,12 @@ const Navbar = () => {
             <NotificationsActiveRoundedIcon />
           </IconButton>
         </Tooltip>
-         <IconButton onClick={handelLogout}>
-            <LogoutRoundedIcon />
-          </IconButton>
+        <IconButton onClick={handelLogout}>
+          <LogoutRoundedIcon />
+        </IconButton>
         <Tooltip title="Profile">
-          <Avatar alt={user.data.name} src="/stg" />
+          {user.isLoading ? (<Skeleton variant='circular' width={40} height={40} />) : (<Avatar alt={user.data.name} src="/stg" />)}
+
         </Tooltip>
       </div>
     </div>

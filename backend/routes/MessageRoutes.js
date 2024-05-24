@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const Message = require('../model/MessageModel');
 const Chat = require('../model/ChatModel')
-const checkUser = require('../middleware/CheckUser')
+const checkUser = require('../middleware/CheckUser');
+const User = require('../model/UserModel')
 
 //this route is to send a message
 router.post('/send/:id',checkUser,async(req,res)=>{
@@ -79,8 +80,18 @@ router.get('/:id',checkUser,async(req,res)=>{
         }
 
         const messages = conversation.messages
+       
+        //also give the data of the another user
+        const getUser = await User.findById(anotherId).select('-password');
 
-        return res.status(200).json({"data":messages,"success":true})
+
+        if(!getUser){
+           
+            return res.status(500).json({"message":"User Not Found","success":false});
+        }
+
+       
+        return res.status(200).json({"data":messages,"user":getUser,"success":true})
 
     } catch (error) {
         console.error(`From / ${error}`);

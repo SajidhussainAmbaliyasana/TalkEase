@@ -1,10 +1,12 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import './style.css'
 
 const Message = (props) => {
+
+
     return (
         <>
-            <p className='user-message'>{props.message}</p>
+            <p className={props.senderId === props.userId ? "user-message":"friend-message"}>{props.message}</p>
         </>
     )
 }
