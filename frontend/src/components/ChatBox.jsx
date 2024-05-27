@@ -28,7 +28,11 @@ const ChatBox = () => {
       setSendBtn(true);
       const id = message.user._id
       if(!id){
-        console.log("id Not Found")
+        const alertMessage = {
+          message:"Id Not Found",
+          type:"error"
+        }
+        dispatch(setAlert(alertMessage));
         setSendBtn(false);
         setChat('');
         return;
