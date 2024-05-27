@@ -65,6 +65,11 @@ const MessageSlice = createSlice({
         data:[],
         errorMessage:"",
         user:[],
+    },reducers:{
+
+        addMessage(state,action){
+            state.data.push(action.payload);
+        }
     },extraReducers:(builder)=>{
         builder.addCase(getMessage.pending,(state,action)=>{
             state.isLoading = true;
@@ -116,4 +121,4 @@ const MessageSlice = createSlice({
 
 
 export default MessageSlice.reducer;
-
+export const {addMessage } = MessageSlice.actions 

@@ -29,37 +29,34 @@ app.use('/api/profile', require('./routes/Profile'))
 
 const userSocketMap = {};
 
+const getUserSocketId = (userId) => {
+  return userSocketMap[userId];
+}
+
 //socket
 io.on("connection", (socket) => {
   console.log(`A User Connected Id: ${socket.id}`);
 
   //receive the id from the frontend and then set it into the object
   const id = socket.handshake.query.userId;
-  if(id){
+  if (id) {
     // console.log(id);
     userSocketMap[id] = socket.id;
 
-     // Emit the list of online users to all clients
-     io.emit('getOnlineUsers', Object.keys(userSocketMap));
+    // Emit the list of online users to all clients
+    io.emit('getOnlineUsers', Object.keys(userSocketMap));
   }
-
- 
-
-
-
-  
-
 
   socket.on("disconnect", () => {
     delete userSocketMap[id];
-    io.emit("getOnlineUsers",Object.keys(userSocketMap));
+    io.emit("getOnlineUsers", Object.keys(userSocketMap));
     console.log(`A User Disconnected With Id: ${socket.id}`);
   });
-
-
 });
 
-
-server.listen(port,()=>{
-    console.log(`The Server is Running on http://localhost:${port}`);
+server.listen(port, () => {
+  console.log(`The Server is Running on http://localhost:${port}`);
 })
+
+
+// module.exports = getUserSocketId;

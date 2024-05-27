@@ -9,6 +9,7 @@ import ChatBox from './ChatBox'
 import Users from './Users'
 import { getUsers } from '../store/slices/GetUsers'
 import { io } from 'socket.io-client'
+import { updateUsers } from '../store/slices/OnlineUser'
 
 const Homepage = () => {
   const dispatch = useDispatch();
@@ -91,7 +92,8 @@ const Homepage = () => {
 
         // Listen to the getOnlineUsers event and get all the users who are online
         socket.on('getOnlineUsers', (users) => {
-          setOnlineUSers(users);
+          //setOnlineUSers(users);
+          dispatch(updateUsers(users));
         });
 
       return ()=>{

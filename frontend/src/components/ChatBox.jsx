@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import './style.css'
 import { Avatar, TextField, IconButton } from '@mui/material'
 import SendRoundedIcon from '@mui/icons-material/SendRounded';
@@ -21,6 +21,15 @@ const ChatBox = () => {
 
   const handelChatChange =  (event)=>{
     setChat(event.target.value)
+  }
+
+
+
+  const scrollToBottom = () => {
+    const chatContainer = document.querySelector('.message');
+    if (chatContainer) {
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
   }
 
   const handelMessageSend = async()=>{
@@ -59,7 +68,12 @@ const ChatBox = () => {
     }
     setSendBtn(false);
     setChat('');
+    scrollToBottom();
   }
+
+  useEffect(()=>{
+    scrollToBottom();
+  },[])
 
   return (
     <div className="chat-box">

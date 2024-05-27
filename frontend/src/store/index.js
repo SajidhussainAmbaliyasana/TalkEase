@@ -3,6 +3,7 @@ import AlertSlice from './slices/AlertSlice';
 import UserSlice from './slices/UserSlice';
 import GetUsers from './slices/GetUsers';
 import MessageSlice from './slices/MessageSlice';
+import OnlineUser from './slices/OnlineUser';
 
 const Store = configureStore({
     reducer:{
@@ -10,6 +11,7 @@ const Store = configureStore({
         user:UserSlice,
         friends:GetUsers,
         message:MessageSlice,
+        onlineUser:OnlineUser,
     }
 })
 
