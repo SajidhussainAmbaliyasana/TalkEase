@@ -4,7 +4,7 @@ const Message = require('../model/MessageModel');
 const Chat = require('../model/ChatModel');
 const checkUser = require('../middleware/CheckUser');
 const User = require('../model/UserModel');
-const getUserSocketId = require('../index');
+const { getUserSocketId, getIo } = require('../socket');
 
 
 // This route is to send a message
@@ -48,8 +48,11 @@ router.post('/send/:id', checkUser, async (req, res) => {
     await Promise.all([chat.save(), newMessage.save()]);
 
     // Socket part
-    const socketId = getUserSocketId(senderId); 
-    console.log(socketId);
+    const socketId = getUserSocketId(receiverID); 
+    const io = getIo();
+    if(socketId){
+      io.to(socketId).emit("newMessage",newMessage)
+    }
 
     return res.status(200).json({ "data": newMessage, "success": true });
   } catch (error) {

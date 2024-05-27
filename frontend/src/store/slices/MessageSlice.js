@@ -69,6 +69,9 @@ const MessageSlice = createSlice({
 
         addMessage(state,action){
             state.data.push(action.payload);
+        },
+        clearMessage(state,action){
+            state.data = [];
         }
     },extraReducers:(builder)=>{
         builder.addCase(getMessage.pending,(state,action)=>{
@@ -121,4 +124,4 @@ const MessageSlice = createSlice({
 
 
 export default MessageSlice.reducer;
-export const {addMessage } = MessageSlice.actions 
+export const {addMessage,clearMessage } = MessageSlice.actions 

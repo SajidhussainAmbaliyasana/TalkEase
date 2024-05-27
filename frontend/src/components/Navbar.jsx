@@ -10,6 +10,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { setAlert } from '../store/slices/AlertSlice';
 import { removeUser } from '../store/slices/UserSlice';
+import { clearMessage } from '../store/slices/MessageSlice';
 
 
 const Navbar = () => {
@@ -28,6 +29,7 @@ const Navbar = () => {
       type: 'success',
     };
     dispatch(setAlert(alertMessage));
+    dispatch(clearMessage());
   };
 
   return (

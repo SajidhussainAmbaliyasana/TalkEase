@@ -7,9 +7,9 @@ import Message from './Message';
 import {useDispatch} from 'react-redux'
 import { sendMessage } from '../store/slices/MessageSlice';
 import { setAlert } from '../store/slices/AlertSlice';
+import { addMessage } from '../store/slices/MessageSlice';
 
-
-const ChatBox = () => {
+const ChatBox = ({socket}) => {
 
   const [chat,setChat] = useState('');
   const user = useSelector((state) => { return state.user })
@@ -30,6 +30,7 @@ const ChatBox = () => {
     if (chatContainer) {
       chatContainer.scrollTop = chatContainer.scrollHeight;
     }
+    console.log('scroll to bottom');
   }
 
   const handelMessageSend = async()=>{
@@ -71,9 +72,27 @@ const ChatBox = () => {
     scrollToBottom();
   }
 
+
+ 
+
+  useEffect(()=>{
+    
+    scrollToBottom();
+
+    if(socket){
+      socket.on("newMessage",(message)=>{
+        dispatch(addMessage(message))
+        scrollToBottom();
+      })
+
+      return () => socket.off("newMessage")
+    }
+  },[socket])
+
   useEffect(()=>{
     scrollToBottom();
-  },[])
+    
+  },[message.data])
 
   return (
     <div className="chat-box">

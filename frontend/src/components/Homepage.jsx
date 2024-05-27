@@ -173,7 +173,7 @@ const Homepage = () => {
         </div>
       )}
       {!message.isLoading && message.data.length !== 0 && (
-        <ChatBox />
+        <ChatBox socket={socket}/>
       )}
     </div>
   );
