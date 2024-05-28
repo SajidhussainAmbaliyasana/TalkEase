@@ -30,7 +30,7 @@ const ChatBox = ({socket}) => {
     if (chatContainer) {
       chatContainer.scrollTop = chatContainer.scrollHeight;
     }
-    console.log('scroll to bottom');
+    
   }
 
   const handelMessageSend = async()=>{
@@ -78,14 +78,17 @@ const ChatBox = ({socket}) => {
   useEffect(()=>{
     
     scrollToBottom();
-
     if(socket){
       socket.on("newMessage",(message)=>{
         dispatch(addMessage(message))
         scrollToBottom();
       })
+  
 
-      return () => socket.off("newMessage")
+      return () => {
+        socket.off("newMessage")
+        
+      }
     }
   },[socket])
 

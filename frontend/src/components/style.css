@@ -218,7 +218,7 @@
 .search-input {
     margin-top: 0.5rem !important;
     margin-left: 0.5rem !important;
-    width: 75%;
+    width: 85%;
     border-radius: 0.5rem !important;
 }
 
@@ -367,4 +367,53 @@
 .friend p{
     font-size: 1.3rem;
     font-family: "Poetsen One", sans-serif;
+}
+
+.dialog-title{
+    font-family: "Poetsen One", sans-serif !important;
+}
+
+
+.add-friend-dialog{
+    overflow-y: scroll !important;
+    max-height: 60dvh;
+
+}
+
+.add-friend-dialog::-webkit-scrollbar{
+    width: 0.5rem;
+
+}
+
+.add-friend-dialog::-webkit-scrollbar-track{
+    background: #d2ddcf;
+    border-radius: 0.5rem;
+    
+}
+
+
+.add-friend-dialog::-webkit-scrollbar-thumb{
+    background-color: #eaefe9;
+    border: 1px solid #b4c6af;
+    border-radius: 0.5rem;
+    cursor: pointer;
+}
+
+.friend-name .MuiTypography-root{
+    font-family: "Poetsen One", sans-serif !important;
+    font-size: 1.2rem !important;
+}
+
+.friend-list{
+    align-items: center !important;
+    cursor: pointer;
+}
+
+.friend-list{
+    border-bottom: 0.1rem solid #afadad;;
+}
+
+.friend-list:hover{
+    background: #e6e6e6;
+    border-radius: 0.2rem;
 }

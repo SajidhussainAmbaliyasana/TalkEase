@@ -14,16 +14,25 @@ router.post('/send/:id', checkUser, async (req, res) => {
     const receiverID = req.params.id;
     const message = req.body.message;
 
+    let isNewChat = false;
+
     // Check if they have any chat before
     let chat = await Chat.findOne({
       users: { "$all": [senderId, receiverID] }
     });
+
 
     // If they are chatting for the first time then create a chat for them first
     if (!chat) {
       chat = await Chat.create({
         users: [senderId, receiverID],
       });
+    }
+
+    
+    //if they are writting first message
+    if(chat.messages.length === 0){
+      isNewChat = true
     }
 
     if (!chat) {
@@ -52,7 +61,14 @@ router.post('/send/:id', checkUser, async (req, res) => {
     const io = getIo();
     if(socketId){
       io.to(socketId).emit("newMessage",newMessage)
+
+      if(isNewChat){
+        io.to(socketId).emit("newChat");
+      }
+
     }
+
+    
 
     return res.status(200).json({ "data": newMessage, "success": true });
   } catch (error) {
@@ -90,5 +106,48 @@ router.get('/:id', checkUser, async (req, res) => {
     return res.status(500).json({ "message": "Internal Server Error", "success": false });
   }
 });
+
+
+//this route is to create an empty chat
+router.post('/create/:id',checkUser, async(req,res)=>{
+  try {
+    
+    const senderId = req.user.id;
+    const receiverId = req.params.id;
+
+    //fetch the user first
+    const fetchUser = await User.findById(receiverId);
+    if(!fetchUser){
+      return res.status(404).json({"message":"User Not Found","success":false});
+    }
+
+    //check if chat is already present
+    const checkExistance = await Chat.findOne({
+      users:{"$all":[senderId,receiverId]}
+    })
+
+    if(checkExistance){
+      return res.status(500).json({"message":"Chat Already Present","success":false});
+    }
+
+    let createChat = await  Chat.create({
+      users: [senderId, receiverId],
+    });
+
+    createChat.save();
+
+    if(!createChat){
+      return res.status(500).json({"message":"Chat Not Created","success":false});
+    }
+
+    return res.status(200).json({"data":createChat,"user":fetchUser,"success":true});
+    
+
+  } catch (error) {
+    console.error(`From /create ${error}`);
+    return res.status(500).json({ "message": "Internal Server Error", "success": false });
+  }
+})
+
 
 module.exports = router;

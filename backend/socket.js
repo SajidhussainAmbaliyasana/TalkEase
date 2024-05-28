@@ -17,7 +17,7 @@ function setupSocket(server) {
   });
 
   io.on("connection", (socket) => {
-    console.log(`A User Connected Id: ${socket.id}`);
+   // console.log(`A User Connected Id: ${socket.id}`);
 
     const id = socket.handshake.query.userId;
     if (id) {
@@ -28,7 +28,7 @@ function setupSocket(server) {
     socket.on("disconnect", () => {
       delete userSocketMap[id];
       io.emit("getOnlineUsers", Object.keys(userSocketMap));
-      console.log(`A User Disconnected With Id: ${socket.id}`);
+      //console.log(`A User Disconnected With Id: ${socket.id}`);
     });
   });
 }

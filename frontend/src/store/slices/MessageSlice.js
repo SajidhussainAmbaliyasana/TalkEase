@@ -55,6 +55,30 @@ export const sendMessage = createAsyncThunk('sendMessage', async(inputData,{reje
     }
 }) 
 
+//create Empty Chat
+export const createChat = createAsyncThunk('createChat',async(id,{rejectWithValue})=>{
+    try {
+        const requestOptions = {
+            method:"POST",
+            url:`http://localhost:8070/api/message/create/${id}`,
+            headers: {
+              "Content-Type": "application/json",
+              "authToken":localStorage.getItem("authToken")
+            },
+            
+        }
+
+        const response = await axios(requestOptions);
+        return response.data;
+    } catch (error) {
+        if(error.response){
+            throw rejectWithValue({message:error.response.data.message?error.response.data.message:"Error Occured"});
+        }else{
+            throw rejectWithValue({message:error.message?error.message:"Error Occured"})
+        }
+    }
+})
+
 
 const MessageSlice = createSlice({
     name:"message",
@@ -72,6 +96,9 @@ const MessageSlice = createSlice({
         },
         clearMessage(state,action){
             state.data = [];
+        },
+        addUser(state,action){
+            state.user = action.payload;
         }
     },extraReducers:(builder)=>{
         builder.addCase(getMessage.pending,(state,action)=>{
@@ -119,9 +146,35 @@ const MessageSlice = createSlice({
             state.isError = true;
             state.errorMessage = action.payload.message
         })
+
+        //to create An Empty Chat
+        builder.addCase(createChat.pending,(state,action)=>{
+            state.isLoading = true;
+            state.isError = false;
+            state.data = [];
+            state.user = [];
+            state.errorMessage = "";
+        })
+
+        builder.addCase(createChat.fulfilled,(state,action)=>{
+            state.isLoading = false;
+            state.data = action.payload.data.messages;
+            
+            state.user = action.payload.user;
+            state.isError = false;
+            state.errorMessage = "";
+        })
+
+        builder.addCase(createChat.rejected,(state,action)=>{
+            state.isError = true;
+            state.errorMessage = action.payload.message;
+            state.data = [];
+            state.user = [];
+            state.isLoading = false;
+        })
     }
 })
 
 
 export default MessageSlice.reducer;
-export const {addMessage,clearMessage } = MessageSlice.actions 
+export const {addMessage,clearMessage,addUser } = MessageSlice.actions 

@@ -73,14 +73,7 @@ const Users = (props) => {
              
             <ListItem alignItems='flex-start' sx={{ alignItems: "center" }} onClick={handelMessageClick}>
                 <ListItemAvatar>
-                    {/* <Avatar alt={props.name} src='/ss' /> */}
-                    {/* <StyledBadge
-                        overlap="circular"
-                        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                        variant="dot"
-                    >
-                        <Avatar alt={props.name} src="/ss" />
-                    </StyledBadge> */}
+                    
                     {checkOnline ? ( <StyledBadge
                         overlap="circular"
                         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
