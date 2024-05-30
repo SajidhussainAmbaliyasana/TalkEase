@@ -6,6 +6,18 @@ function getUserSocketId(userId) {
   return userSocketMap[userId];
 }
 
+const getGroupMembersID = (id)=>{
+  const socketIds = id.map((id)=>{
+    return userSocketMap[id];
+  })
+
+  const filterdId = socketIds.filter((id)=>{
+    return id !== undefined
+  })
+  
+  return filterdId
+}
+
 let io; // Declare io variable outside the function
 
 function setupSocket(server) {
@@ -41,4 +53,4 @@ function getIo(){
 }
 
 // Export io object here
-module.exports = { setupSocket, getUserSocketId, getIo };
+module.exports = { setupSocket, getUserSocketId, getIo,getGroupMembersID };

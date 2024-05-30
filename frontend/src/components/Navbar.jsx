@@ -18,7 +18,7 @@ import { getUsers } from '../store/slices/GetUsers';
 import { fetchAllUsers } from '../store/slices/GroupSlice';
 import { createGroup } from '../store/slices/GroupSlice';
 import { clearGroupChat } from '../store/slices/GroupSlice';
-
+import { fetchGroups } from '../store/slices/GroupSlice'
 
 const Navbar = () => {
   const location = useLocation();
@@ -149,6 +149,22 @@ const Navbar = () => {
     }
   }
 
+  const fetchAllGroups = async () => {
+    try {
+      const response = await dispatch(fetchGroups());
+      if (!response.payload.success) {
+        const alertMessage = {
+          message: response.payload.message,
+          type: "error"
+        }
+        dispatch(setAlert(alertMessage));
+        return;
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
 
   const handelGroupCreate = async () => {
     try {
@@ -192,6 +208,7 @@ const Navbar = () => {
           type: "success"
         }
         dispatch(setAlert(alertMessage));
+        fetchAllGroups();
       }
     } catch (error) {
       console.error(error)

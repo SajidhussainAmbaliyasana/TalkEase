@@ -132,7 +132,7 @@ const ChatBox = ({socket}) => {
 
         <div className="chat-box-message-bottom">
           <TextField name='message' placeholder='Type Message..' className='chat-input' color='success' value={chat} 
-          onChange={handelChatChange} onKeyDown={handelEnterKey} autoComplete='off'/>
+          onChange={handelChatChange} onKeyDown={handelEnterKey} autoComplete='off' disabled={sendBtn}/>
           <IconButton  disabled={sendBtn} onClick={handelMessageSend}><SendRoundedIcon /></IconButton>
 
         </div>

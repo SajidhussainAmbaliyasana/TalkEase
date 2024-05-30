@@ -118,16 +118,19 @@ const Homepage = () => {
       setSocket(socket);
 
 
-      socket.on('disconnect')
+      
       socket.on('getOnlineUsers', (users) => {
         dispatch(updateUsers(users));
       });
 
       socket.on("newChat", () => {
-        console.log("yesss")
         fetchFriends();
       })
 
+      socket.on('disconnect',(reason)=>{
+        console.log(reason);
+        console.log(`socked off ${reason}`);
+      })
 
       return () => {
         if (socket) {
@@ -213,7 +216,7 @@ const Homepage = () => {
           </div>
         )}
 
-        {isGroupChat && group.data.length === 0 && (
+        {isGroupChat && group.data.length === 0  && !group.chatLoading &&(
           <div className="chat-box-empty">
             <p>Welcome To TalkEase</p>
             <p>Click Or Create Group To Chat</p>
@@ -257,7 +260,7 @@ const Homepage = () => {
         )}
 
         {group.data && group.data.length !== 0 && (
-          <GroupChatBox />
+          <GroupChatBox socket={socket}/>
         )}
       </div>
 

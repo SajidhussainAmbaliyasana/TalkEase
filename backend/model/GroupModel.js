@@ -16,7 +16,7 @@ const groupModel = mongoose.Schema({
     },
     messages:[{
         type:mongoose.Schema.Types.ObjectId,
-        ref:"Message",
+        ref:"GroupMessage",
         default:[]
     }],
     image:{

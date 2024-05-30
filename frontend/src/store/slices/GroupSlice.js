@@ -105,7 +105,30 @@ export const fetchGroupChats = createAsyncThunk('fetchGroupChats',async(id,{reje
 })
 
 
+//this is to send Message in group
+export const sendGroupMessage = createAsyncThunk('sendGroupMessage',async(inputData,{rejectWithValue})=>{
+    try {
+        
+        const requestOptions = {
+            method: "POST",
+            url: `http://localhost:8070/api/group/send/${inputData.id}`,
+            headers: {
+                "Content-Type": "application/json",
+                "authToken": localStorage.getItem("authToken")
+            },
+            data:{message:inputData.message}
+        }
 
+        const response = await axios(requestOptions);
+        return response.data;
+    } catch (error) {
+        if (error.response) {
+            throw rejectWithValue({ message: error.response.data.message ? error.response.data.message : "Error Occured" });
+        } else {
+            throw rejectWithValue({ message: error.message ? error.message : "Error Occured" })
+        }
+    }
+})
 
 
 
@@ -117,14 +140,19 @@ const GroupSlice = createSlice({
         errorMessage: "",
         createLoading: false,
         chatLoading:false,
+        sendLoading:false,
         data: [],
         users: [],
-       // members:[],
         groups:[],
+        userId:""
     },reducers:{
 
         clearGroupChat:(state,action)=>{
             state.data = [];
+        },
+
+        addGroupMessage:(state,action)=>{
+            state.data.messages.push(action.payload);
         }
     }, extraReducers: (builder) => {
 
@@ -197,6 +225,7 @@ const GroupSlice = createSlice({
             state.isError = false;
             state.errorMessage = "";
             state.data = [];
+            state.userId=""
         })
 
         builder.addCase(fetchGroupChats.fulfilled,(state,action)=>{
@@ -204,6 +233,7 @@ const GroupSlice = createSlice({
             state.data = action.payload.data;
             state.isError = false;
             state.errorMessage = ""
+            state.userId = action.payload.userId;
         })
 
         builder.addCase(fetchGroupChats.rejected,(state,action)=>{
@@ -211,6 +241,27 @@ const GroupSlice = createSlice({
             state.errorMessage = action.payload.message;
             state.data = [];
             state.chatLoading = false;
+            state.userId = "";
+        })
+
+        //this is to send Message
+        builder.addCase(sendGroupMessage.pending,(state,action)=>{
+            state.sendLoading = true;
+            state.isError = false;
+            state.errorMessage = ""
+        })
+
+        builder.addCase(sendGroupMessage.fulfilled,(state,action)=>{
+            state.sendLoading = false;
+            state.data.messages.push(action.payload.data);
+            state.isError = false;
+            state.errorMessage = ""
+        })
+
+        builder.addCase(sendGroupMessage.rejected,(state,action)=>{
+            state.isError = true;
+            state.errorMessage = action.payload.message;
+            state.sendLoading = false;
         })
 
     }
@@ -218,4 +269,4 @@ const GroupSlice = createSlice({
 
 
 export default GroupSlice.reducer;
-export const {clearGroupChat} = GroupSlice.actions;
+export const {clearGroupChat,addGroupMessage} = GroupSlice.actions;
