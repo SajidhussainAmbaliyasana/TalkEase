@@ -34,6 +34,15 @@ const ChatBox = ({socket}) => {
   }
 
   const handelMessageSend = async()=>{
+    if(chat === ""){
+      const alertMessage = {
+        message:"Cannot Send Empty Message",
+        type:"error"
+      }
+      dispatch(setAlert(alertMessage));
+      return;
+    }
+
     try {
       setSendBtn(true);
       const id = message.user._id
@@ -49,7 +58,7 @@ const ChatBox = ({socket}) => {
       }
       const enterData={
         id:id,
-        message:chat
+        message:chat,
       }
       const response = await dispatch(sendMessage(enterData));
       if(!response.payload.success){
@@ -70,6 +79,14 @@ const ChatBox = ({socket}) => {
     setSendBtn(false);
     setChat('');
     scrollToBottom();
+  }
+
+
+  const handelEnterKey = (event)=>{
+    if(event.key === "Enter"){
+      handelMessageSend();
+    }
+
   }
 
 
@@ -100,7 +117,7 @@ const ChatBox = ({socket}) => {
   return (
     <div className="chat-box">
       <div className="chat-box-head">
-        <Avatar alt={message.user.name ?message.user.name:"user"} src="/stg" className='chat-box-profile' />
+        <Avatar alt={message.user.name ?message.user.name:"user"} src="/stg" className='chat-box-profile' sx={{ bgcolor: "#698562" }}/>
         <p>{message.user.name ? message.user.name:"user" }</p>
       </div>
       <div className="chat-box-messages-outer">
@@ -115,7 +132,7 @@ const ChatBox = ({socket}) => {
 
         <div className="chat-box-message-bottom">
           <TextField name='message' placeholder='Type Message..' className='chat-input' color='success' value={chat} 
-          onChange={handelChatChange}/>
+          onChange={handelChatChange} onKeyDown={handelEnterKey} autoComplete='off'/>
           <IconButton  disabled={sendBtn} onClick={handelMessageSend}><SendRoundedIcon /></IconButton>
 
         </div>

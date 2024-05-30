@@ -402,6 +402,9 @@
 .friend-name .MuiTypography-root{
     font-family: "Poetsen One", sans-serif !important;
     font-size: 1.2rem !important;
+    display: flex;
+    align-items: center;
+
 }
 
 .friend-list{
@@ -414,6 +417,53 @@
 }
 
 .friend-list:hover{
+    background: #e6e6e6;
+    border-radius: 0.2rem;
+}
+
+.user-nav{
+    width: 100%;
+    height: auto;
+    display: flex;
+    justify-content: space-evenly;
+
+}
+
+.user-nav-box-active{
+    height: auto;
+    width: 45%;
+    background: #8aa484;
+    border-radius: 0.5rem;
+    cursor: pointer;
+}
+
+.user-nav-box-active p{
+    font-family: "Poetsen One", sans-serif;
+    color: #2f3a2d;
+    font-size: 1.4rem;
+    text-align: center;
+}
+
+.user-nav-box{
+    height: auto;
+    width: 45%;
+    cursor: pointer;
+    
+}
+
+.user-nav-box p {
+    font-family: "Poetsen One", sans-serif;
+    color: #536c4d;
+    font-size: 1.4rem;
+    text-align: center;
+    
+}
+
+.group-list{
+    cursor: pointer !important;
+}
+
+.group-list:hover{
     background: #e6e6e6;
     border-radius: 0.2rem;
 }

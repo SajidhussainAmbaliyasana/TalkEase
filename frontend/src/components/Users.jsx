@@ -6,7 +6,7 @@ import { getMessage } from '../store/slices/MessageSlice'
 import { setAlert } from '../store/slices/AlertSlice'
 import { styled } from '@mui/material/styles';
 import Badge from '@mui/material/Badge';
-
+import { clearGroupChat } from '../store/slices/GroupSlice'
 
 //this is for the green dot on online users
 const StyledBadge = styled(Badge)(({ theme }) => ({
@@ -49,6 +49,7 @@ const Users = (props) => {
     const handelMessageClick = async () => {
         const id = props.id;
         try {
+            dispatch(clearGroupChat());
             const response = await dispatch(getMessage(id));
             if (!response.payload.success) {
                 const alertMessage = {
@@ -71,7 +72,7 @@ const Users = (props) => {
     return (
         <>
              
-            <ListItem alignItems='flex-start' sx={{ alignItems: "center" }} onClick={handelMessageClick}>
+            <ListItem alignItems='flex-start' sx={{ alignItems: "center" }} onClick={handelMessageClick} className='group-list'>
                 <ListItemAvatar>
                     
                     {checkOnline ? ( <StyledBadge
@@ -79,8 +80,8 @@ const Users = (props) => {
                         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                         variant="dot"
                     >
-                        <Avatar alt={props.name} src="/ss" />
-                    </StyledBadge>):(<Avatar alt={props.name} src='/ss' />)}
+                        <Avatar alt={props.name} src="/ss" sx={{ bgcolor: "#698562" }}/>
+                    </StyledBadge>):(<Avatar alt={props.name} src='/ss' sx={{ bgcolor: "#698562" }}/>)}
                 </ListItemAvatar>
                 <ListItemText className='friend'>
                     <p>{props.name}</p>

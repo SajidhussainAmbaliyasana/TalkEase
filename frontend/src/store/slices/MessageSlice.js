@@ -96,6 +96,7 @@ const MessageSlice = createSlice({
         },
         clearMessage(state,action){
             state.data = [];
+            state.user = [];
         },
         addUser(state,action){
             state.user = action.payload;

@@ -5,15 +5,16 @@ const chatModel = mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:"User"
     }],
-    isGroupChat:{
-        type:Boolean,
-        default:false
-    },
     messages:[{
         type:mongoose.Schema.Types.ObjectId,
         ref:"Message",
         default:[]
-    }]
+    }],
+    image:{
+        type:String,
+        default:"",
+    }
+   
 },{
     timestamps:true
 })

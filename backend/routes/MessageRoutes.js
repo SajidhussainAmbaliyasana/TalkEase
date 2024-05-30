@@ -29,9 +29,9 @@ router.post('/send/:id', checkUser, async (req, res) => {
       });
     }
 
-    
+
     //if they are writting first message
-    if(chat.messages.length === 0){
+    if (chat.messages.length === 0) {
       isNewChat = true
     }
 
@@ -57,18 +57,18 @@ router.post('/send/:id', checkUser, async (req, res) => {
     await Promise.all([chat.save(), newMessage.save()]);
 
     // Socket part
-    const socketId = getUserSocketId(receiverID); 
+    const socketId = getUserSocketId(receiverID);
     const io = getIo();
-    if(socketId){
-      io.to(socketId).emit("newMessage",newMessage)
+    if (socketId) {
+      io.to(socketId).emit("newMessage", newMessage)
 
-      if(isNewChat){
+      if (isNewChat) {
         io.to(socketId).emit("newChat");
       }
 
     }
 
-    
+
 
     return res.status(200).json({ "data": newMessage, "success": true });
   } catch (error) {
@@ -109,39 +109,39 @@ router.get('/:id', checkUser, async (req, res) => {
 
 
 //this route is to create an empty chat
-router.post('/create/:id',checkUser, async(req,res)=>{
+router.post('/create/:id', checkUser, async (req, res) => {
   try {
-    
+
     const senderId = req.user.id;
     const receiverId = req.params.id;
 
     //fetch the user first
     const fetchUser = await User.findById(receiverId);
-    if(!fetchUser){
-      return res.status(404).json({"message":"User Not Found","success":false});
+    if (!fetchUser) {
+      return res.status(404).json({ "message": "User Not Found", "success": false });
     }
 
     //check if chat is already present
     const checkExistance = await Chat.findOne({
-      users:{"$all":[senderId,receiverId]}
+      users: { "$all": [senderId, receiverId] }
     })
 
-    if(checkExistance){
-      return res.status(500).json({"message":"Chat Already Present","success":false});
+    if (checkExistance) {
+      return res.status(500).json({ "message": "Chat Already Present", "success": false });
     }
 
-    let createChat = await  Chat.create({
+    let createChat = await Chat.create({
       users: [senderId, receiverId],
     });
 
     createChat.save();
 
-    if(!createChat){
-      return res.status(500).json({"message":"Chat Not Created","success":false});
+    if (!createChat) {
+      return res.status(500).json({ "message": "Chat Not Created", "success": false });
     }
 
-    return res.status(200).json({"data":createChat,"user":fetchUser,"success":true});
-    
+    return res.status(200).json({ "data": createChat, "user": fetchUser, "success": true });
+
 
   } catch (error) {
     console.error(`From /create ${error}`);
