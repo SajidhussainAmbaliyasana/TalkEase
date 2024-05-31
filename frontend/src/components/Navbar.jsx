@@ -25,14 +25,14 @@ const Navbar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const user = useSelector((state) => state.user);
+  
   const [friendDialog, setFriendDialog] = useState(false);
   const [groupDialog, setGroupDialog] = useState(false);
   const [groupName, setGroupName] = useState("");
   const [members, setMembers] = useState([]);
+  const [profileDialog, setProfileDialog] = useState(false);
 
-
-
+  const user = useSelector((state) => {return state.user});
   const friend = useSelector((state) => { return state.friend })
   const group = useSelector((state) => { return state.group })
 
@@ -221,6 +221,16 @@ const Navbar = () => {
   }
 
 
+  //profile model
+  const handelProfileOpen = () => {
+    setProfileDialog(true)
+  }
+
+  const handelProfileClose = () => {
+    setProfileDialog(false);
+  }
+
+
 
   return (
     <>
@@ -258,7 +268,7 @@ const Navbar = () => {
 
               <ListItem key={user._id} alignItems='flex-start' className='friend-list' onClick={() => handelFriendClick(user._id)}>
                 <ListItemAvatar>
-                  <Avatar alt={user.name} src="/ss" sx={{ bgcolor: "#698562" }}/>
+                  <Avatar alt={user.name} src="/ss" sx={{ bgcolor: "#698562" }} />
                 </ListItemAvatar>
                 <ListItemText className='friend-name'>{user.name}   </ListItemText>
               </ListItem>
@@ -290,7 +300,7 @@ const Navbar = () => {
 
         <DialogContent dividers className='add-friend-dialog'>
           <TextField type='text' name='groupName' value={groupName} onChange={handelGroupNameChange} placeholder='Enter Group Name'
-            label="Group Name" variant='outlined' fullWidth required autoComplete='off' color='success'/>
+            label="Group Name" variant='outlined' fullWidth required autoComplete='off' color='success' />
           <Typography className='dialog-title' sx={{ marginTop: "0.5rem" }}>Select Group Members</Typography>
           {group.isLoading && (
             <>
@@ -306,7 +316,7 @@ const Navbar = () => {
             return (
               <ListItem key={user._id} alignItems='flex-start' className='friend-list' >
                 <ListItemAvatar>
-                  <Avatar alt={user.name} src="/ss" sx={{ bgcolor: "#698562" }}/>
+                  <Avatar alt={user.name} src="/ss" sx={{ bgcolor: "#698562" }} />
                 </ListItemAvatar>
                 <ListItemText className='friend-name'>{user.name}  <Checkbox color='success' sx={{ marginLeft: "auto" }}
                   onChange={() => handelCheckBoxChange(user._id)} /> </ListItemText>
@@ -318,6 +328,40 @@ const Navbar = () => {
         <DialogActions>
           <Button autoFocus variant='outlined' color='success' onClick={handelGroupCreate} disabled={group.createLoading}>{group.createLoading ? (<CircularProgress color="success" />) : "Create Group"}</Button>
         </DialogActions>
+
+      </Dialog>
+
+      <Dialog
+        open={profileDialog}
+        onClose={handelProfileClose}
+        fullWidth
+        maxWidth="md"
+      >
+
+        <DialogTitle className='dialog-title' fontSize="2.4rem">Your Profile</DialogTitle>
+        <IconButton sx={{
+          position: 'absolute',
+          right: 0,
+          marginRight: "1rem",
+          marginTop: "1rem",
+        }}
+          onClick={handelProfileClose}
+        >
+          <CloseIcon fontSize='large'/>
+        </IconButton>
+
+        <DialogContent dividers className='profile-dialog'>
+          <Avatar alt={user.data.name} src='/ss' className='profile-avatar' sx={{fontSize:"3rem"}}/>
+            <div className="profile-details">
+              <p>User Name: {user.data.name}</p>
+              <p>User Email: {user.data.email}</p>
+            </div>
+            
+        </DialogContent>
+        <DialogActions>
+          <Button variant='outlined' color='success' sx={{fontSize:"1.1rem"}}>Edit</Button>
+        </DialogActions>
+
 
       </Dialog>
 
@@ -345,7 +389,8 @@ const Navbar = () => {
             <LogoutRoundedIcon />
           </IconButton>
           <Tooltip title="Profile">
-            {user.isLoading ? (<Skeleton variant='circular' width={40} height={40} />) : (<Avatar alt={user.data.name} src="/stg" sx={{ bgcolor: "#698562" }}/>)}
+            {user.isLoading ? (<Skeleton variant='circular' width={40} height={40} />) :
+              (<Avatar alt={user.data.name} src="/stg" sx={{ bgcolor: "#698562", cursor: "pointer" }} onClick={handelProfileOpen} />)}
 
           </Tooltip>
         </div>

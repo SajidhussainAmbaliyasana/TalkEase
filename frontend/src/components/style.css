@@ -371,6 +371,7 @@
 
 .dialog-title{
     font-family: "Poetsen One", sans-serif !important;
+    color: #536c4d;
 }
 
 
@@ -481,3 +482,49 @@
     margin-bottom: 0.5rem;
     font-family: "Poetsen One", sans-serif;
 } */
+
+.profile-avatar{
+    height: 6rem !important;
+    width: 6rem !important;
+}
+
+.profile-dialog{
+    overflow-y: scroll !important;
+    max-height: 60dvh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem 0rem !important;
+}
+
+.profile-dialog::-webkit-scrollbar{
+    width: 0.5rem;
+
+}
+
+.profile-dialog::-webkit-scrollbar-track{
+    background: #d2ddcf;
+    border-radius: 0.5rem;
+    
+}
+
+
+.profile-dialog::-webkit-scrollbar-thumb{
+    background-color: #eaefe9;
+    border: 1px solid #b4c6af;
+    border-radius: 0.5rem;
+    cursor: pointer;
+}
+
+.profile-details{
+    height: auto;
+    /* width: 70%; */
+    /* border: 1px solid red; */ 
+    margin-left: 2rem;
+}
+
+.profile-details p {
+    font-size: 2rem;
+    font-family: "Poetsen One", sans-serif;
+    color: #536c4d;
+}

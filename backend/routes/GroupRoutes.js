@@ -217,4 +217,75 @@ router.post('/send/:id',checkUser,async(req,res)=>{
     }
 })
 
+//this route is to remove the members of the group
+router.patch('/remove/:id',checkUser,async(req,res)=>{
+    try {
+        
+
+        const groupId = req.params.id;
+        const idOfRemoveUser = req.body.members;
+
+        //find the group
+        let findGroup = await Group.findById(groupId);
+
+        if(!findGroup){
+            return res.status(404).json({"message":"Group Not Found","success":false});
+        }
+
+        //update the members remove the selected members 
+        const updatedMembers = findGroup.members.filter((id)=>{
+            return !idOfRemoveUser.includes(id.toString());
+        })
+
+        //update the group
+        const updateGroup = await Group.findByIdAndUpdate(groupId,{"members":updatedMembers},{new:true});
+
+        if(!updateGroup){
+            return res.status(500).json({"message":"Group Not Updated","success":false});
+        }
+        
+        return res.status(200).json({"data":updateGroup.members,"success":true});
+    } catch (error) {
+        console.log(`from /remove ${error}`);
+        return res.status(500).json({"message":"Internal Sever Error","success":false});
+    }
+})
+
+
+//this route is to delete the group
+router.delete('/delete/:id',checkUser,async(req,res)=>{
+    try {
+        
+        const groupId = req.params.id;
+        
+        if(groupId === ""){
+            return res.status(404).json({"message":"Group Id Not Found","success":false});
+        }
+
+        const findGroup = await Group.findById(groupId).select("-groupName -groupAdmin -image -createdAt -updatedAt -__v");
+
+        if(!findGroup){
+            return res.status(404).json({"message":"Group Not Found","success":false})
+        }
+
+        const messagesIdToDelete = findGroup.messages;
+      
+        const [deleteMessages,deleteGroup] = await Promise.all([
+            GroupMessage.deleteMany({"_id":{"$in":messagesIdToDelete}}),
+            Group.findByIdAndDelete(groupId)
+        ])
+
+        if(!deleteMessages && !deleteGroup){
+            return res.status(500).json({"message":"Some Error Occured","success":false});
+        }
+
+
+        //to be add socket
+        return res.status(200).json({"success":true,"groupId":groupId});
+
+    } catch (error) {
+        console.log(`from /delete ${error}`);
+        return res.status(500).json({"message":"Internal Server Error","success":false});
+    }
+})
 module.exports = router;

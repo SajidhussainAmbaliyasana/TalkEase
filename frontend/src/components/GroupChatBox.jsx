@@ -1,124 +1,299 @@
 import React, { useEffect, useState } from 'react'
 import './style.css'
-import { useSelector ,useDispatch} from 'react-redux'
-import { Avatar, AvatarGroup, IconButton, TextField } from '@mui/material'
+import { useSelector, useDispatch } from 'react-redux'
+import {  Avatar, AvatarGroup, Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, ListItem, ListItemAvatar, ListItemText, TextField, Typography,CircularProgress } from '@mui/material'
 import SendRoundedIcon from '@mui/icons-material/SendRounded';
 import { sendGroupMessage } from '../store/slices/GroupSlice';
 import { setAlert } from '../store/slices/AlertSlice';
 import GroupMessage from './GroupMessage';
 import { addGroupMessage } from '../store/slices/GroupSlice';
+import CloseIcon from '@mui/icons-material/Close';
+import { deleteGroup } from '../store/slices/GroupSlice';
+import { clearGroupChat } from '../store/slices/GroupSlice';
 
-const GroupChatBox = ({socket}) => {
+const GroupChatBox = ({ socket }) => {
 
-    const [message,setMessage] = useState('');
-    const dispatch = useDispatch();
-    const [sendBtn,setSendBtn] = useState(false);
+  const [message, setMessage] = useState('');
+  const dispatch = useDispatch();
+  const [sendBtn, setSendBtn] = useState(false);
+  const [infoModel, setInfoModel] = useState(false);
+  const [userList, setUserList] = useState([]);
+  const [deleteModal,setDeleteMoal] = useState(false);
+  const [deleteBtn,setDeleteBtn] = useState(false);
 
-    const group = useSelector((state)=>{return state.group})
+  const group = useSelector((state) => { return state.group });
+  const user = useSelector((state) => {return state.user});
 
-    //send message
-    const handelMessageChange = (event)=>{
-        setMessage(event.target.value);
+  //send message
+  const handelMessageChange = (event) => {
+    setMessage(event.target.value);
+  }
+
+  const scrollToBottom = () => {
+    const chatContainer = document.querySelector('.message');
+    if (chatContainer) {
+      chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
-    const scrollToBottom = () => {
-      const chatContainer = document.querySelector('.message');
-      if (chatContainer) {
-        chatContainer.scrollTop = chatContainer.scrollHeight;
-      }
-      
-    }
+  }
 
-    const handelMessageSend = async()=>{
-      try {
-        if(message === ""){
-          const alertMessage = {
-            message:"Cannot Send Empty Message",
-            type:"error"
-          }
-          dispatch(setAlert(alertMessage));
-          return;
+  const handelMessageSend = async () => {
+    try {
+      if (message === "") {
+        const alertMessage = {
+          message: "Cannot Send Empty Message",
+          type: "error"
         }
-
-        setSendBtn(true);
-
-        const enterData ={
-          id:group.data._id,
-          message:message
-        }
-
-        const response = await dispatch(sendGroupMessage(enterData));
-        if(!response.payload.success){
-          const alertMessage = {
-            message:response.payload.message,
-            type:"error"
-          }
-          dispatch(setAlert(alertMessage));
-          setSendBtn(false);
-          setMessage("");
-          return;
-        }
-        setSendBtn(false);
-        setMessage('');
-      } catch (error) {
-        setSendBtn(false);
-        console.error(error)
+        dispatch(setAlert(alertMessage));
+        return;
       }
 
+      setSendBtn(true);
+
+      const enterData = {
+        id: group.data._id,
+        message: message
+      }
+
+      const response = await dispatch(sendGroupMessage(enterData));
+      if (!response.payload.success) {
+        const alertMessage = {
+          message: response.payload.message,
+          type: "error"
+        }
+        dispatch(setAlert(alertMessage));
+        setSendBtn(false);
+        setMessage("");
+        return;
+      }
       setSendBtn(false);
-      scrollToBottom();
+      setMessage('');
+    } catch (error) {
+      setSendBtn(false);
+      console.error(error)
     }
 
+    setSendBtn(false);
+    scrollToBottom();
+  }
 
-    //socket useeffect
-    useEffect(()=>{
 
-      scrollToBottom();
-      if(socket){
-        socket.on('groupMessage',(message)=>{
-          //console.log(message);
-          dispatch(addGroupMessage(message))
-          scrollToBottom();
-        //  console.log('this is called');
-        })
+  const handelEnterKey = (event) => {
+    if (event.key === "Enter") {
+      handelMessageSend();
+    }
+  }
 
-        return  ()=>{
-          socket.off("groupMessage")
-        }
+  //info model
+  const handelInfoOpen = () => {
+    setInfoModel(true)
+  }
+
+  const handelInfoClose = () => {
+    setInfoModel(false);
+    setUserList([]);
+  }
+
+  const handelCheckBoxChange = (id) => {
+    if (userList.includes(id)) {
+      const newMembers = userList.filter((userId) => userId !== id);
+      setUserList(newMembers);
+
+    } else {
+      let newMembers = userList;
+      newMembers.push(id);
+      setUserList(newMembers);
+
+    }
+  }
+
+  const handelRemoveClick = () => {
+
+    if (userList.length === 0) {
+      const alertMessage = {
+        message: "Select Members To Remove",
+        type: "error"
       }
-    },[socket])
+      dispatch(setAlert(alertMessage));
+      return;
+    }
+
+    try {
+
+      let groupMembers = group.data.members;
+
+      const updatedMembers = groupMembers.filter((user) => {
+        return !userList.includes(user._id)
+      })
 
 
-    //to scroll bottom
-    useEffect(()=>{
-      scrollToBottom();
-    },[group.data.messages])
+      if (updatedMembers.length >= 3) {
+        console.log("yes");
+
+      } else {
+        const alertMessage = {
+          message: "A group cannot have less than 3 members",
+          type: "error"
+        }
+        dispatch(setAlert(alertMessage));
+        return;
+      }
+
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  //delete group
+
+  const deleteModelOpen = ()=>{
+    setDeleteMoal(true);
+  }
+
+  const deleteModelClose = ()=>{
+    setDeleteMoal(false);
+  }
+
+  const handelGroupDelete = async()=>{
+    try {
+      setDeleteBtn(true);
+      const groupId = group.data._id;
+      const response = await dispatch(deleteGroup(groupId));
+      if(!response.payload.success){
+        const alertMessage = {
+          message:response.payload.message,
+          type:"error"
+        }
+        dispatch(setAlert(alertMessage));
+        setDeleteBtn(false);
+        return;
+      }
+    } catch (error) {
+      console.error(error);
+      setDeleteBtn(false);
+    }
+    dispatch(clearGroupChat());
+    setDeleteBtn(false);
+    setDeleteMoal(false);
+    setInfoModel(false);
+    
+
+  }
+
+
+  //socket useeffect
+  useEffect(() => {
+
+    scrollToBottom();
+    if (socket) {
+      socket.on('groupMessage', (message) => {
+        //console.log(message);
+        dispatch(addGroupMessage(message))
+        scrollToBottom();
+        //  console.log('this is called');
+      })
+
+      return () => {
+        socket.off("groupMessage")
+      }
+    }
+  }, [socket])
+
+
+  //to scroll bottom
+  useEffect(() => {
+    scrollToBottom();
+  }, [group.data.messages])
+
+
+
 
   return (
-    <div className='chat-box'>
-      <div className="chat-box-head">
-        <AvatarGroup max={4} total={group.data.members.length?group.data.members.length:3} className='chat-box-profile' >
-            <Avatar alt={group.data.members[0].name? group.data.members[0].name:"user"} src='/aa' sx={{ bgcolor: "#698562" }}/>
-            <Avatar alt={group.data.members[1].name?group.data.members[1].name:"user"} src='/aa' sx={{ bgcolor: "#698562" }}/>
-            <Avatar alt={group.data.members[2].name?group.data.members[2].name:"users"} src='/aa' sx={{ bgcolor: "#698562" }}/>
-        </AvatarGroup>
-        <p>{group.data.groupName?group.data.groupName:"Group"}</p>
-      </div>
-      <div className="chat-box-messages-outer">
-        <div className="message">
-         {group.data && group.data.messages && group.data.messages.map((message)=>{
-          return <GroupMessage key={message._id}  message={message.message} senderId={message.senderId} userId={group.userId}/>
-         })}
-         {/* <GroupMessage/> */}
-        </div>
+    <>
 
-        <div className="chat-box-message-bottom">
-          <TextField name='message' placeholder='Type Message..' className='chat-input' color='success' value={message} onChange={handelMessageChange} autoComplete="off"/>
-          <IconButton  onClick={handelMessageSend} disabled={sendBtn}><SendRoundedIcon /></IconButton>
+      <Dialog
+        open={infoModel}
+        onClose={handelInfoClose}
+        fullWidth
+      >
 
+        <DialogTitle display="flex" className='dialog-title' sx={{ fontSize: "1.7rem" }}>
+          <Avatar alt={group.data.groupName} src='/aa' sx={{ marginRight: "1rem" }} />{group.data.groupName}
+          <IconButton sx={{ marginLeft: "auto" }} onClick={handelInfoClose}><CloseIcon /></IconButton>
+        </DialogTitle>
+
+        <DialogContent dividers className='add-friend-dialog'>
+          <Typography className='dialog-title' fontSize="1.5rem">Group Members</Typography>
+
+          {group.data && group.data.members && group.data.members.map((user) => {
+            return <ListItem key={user._id} alignItems='flex-start' className='friend-list'>
+              <ListItemAvatar>
+                <Avatar alt={user.name} src="/ss" sx={{ bgcolor: "#698562" }} />
+              </ListItemAvatar>
+              <ListItemText className='friend-name'>
+                {user.name} <p style={{ marginLeft: "3rem", color: "#536c4d" }}>{group.data.groupAdmin === user._id ? "Group Admin" : undefined}</p>
+                {user._id !== group.data.groupAdmin ? (<Checkbox color='success' sx={{ marginLeft: "auto" }} onChange={() => handelCheckBoxChange(user._id)} />) : undefined}
+              </ListItemText>
+            </ListItem>
+          })}
+        </DialogContent>
+        <DialogActions>
+          
+          {user.data._id === group.data.groupAdmin ? (
+          <>
+          <Button color='success' variant='outlined' onClick={handelRemoveClick}>Remove</Button>
+          <Button color='success' variant='outlined' onClick={deleteModelOpen}>Delete Group</Button>
+          </>):(
+            <Button color='success' variant='outlined'>Leave Group</Button>
+          )}
+           {/* <Button color='success' variant='outlined'>Delete Group</Button> */}
+        </DialogActions>
+
+      </Dialog>
+
+      <Dialog
+      open={deleteModal}
+      onClose={deleteModelClose}
+      fullWidth
+      >
+        <DialogTitle display="flex" className='dialog-title'>
+          Are You Sure You Want To Delete 
+          <IconButton sx={{ marginLeft: "auto" }} onClick={deleteModelClose}><CloseIcon /></IconButton>
+        </DialogTitle>
+        <DialogContent dividers sx={{display:"flex",justifyContent:"center",alignItems:"center"}}>
+          <Button color='error' variant='outlined' sx={{width:"80%"}} onClick={handelGroupDelete} disabled={deleteBtn}>
+            {deleteBtn? (<CircularProgress color="error" />):"Delete"}
+            </Button>
+        </DialogContent>
+
+      </Dialog>
+
+      <div className='chat-box'>
+        <div className="chat-box-head">
+          <AvatarGroup max={4} total={group.data.members.length ? group.data.members.length : 3} className='chat-box-profile' >
+            <Avatar alt={group.data.members[0].name ? group.data.members[0].name : "user"} src='/aa' sx={{ bgcolor: "#698562" }} />
+            <Avatar alt={group.data.members[1].name ? group.data.members[1].name : "user"} src='/aa' sx={{ bgcolor: "#698562" }} />
+            <Avatar alt={group.data.members[2].name ? group.data.members[2].name : "users"} src='/aa' sx={{ bgcolor: "#698562" }} />
+          </AvatarGroup>
+          <p>{group.data.groupName ? group.data.groupName : "Group"}</p>
+          <Button sx={{ marginLeft: "auto", marginRight: "1rem" }} variant='outlined' color='success' onClick={handelInfoOpen}>Group Info</Button>
+        </div>
+        <div className="chat-box-messages-outer">
+          <div className="message">
+            {group.data && group.data.messages && group.data.messages.map((message) => {
+              return <GroupMessage key={message._id} message={message.message} senderId={message.senderId} userId={group.userId} />
+            })}
+            {/* <GroupMessage/> */}
+          </div>
+
+          <div className="chat-box-message-bottom">
+            <TextField name='message' placeholder='Type Message..' className='chat-input' color='success' value={message} onChange={handelMessageChange} autoComplete="off" onKeyDown={handelEnterKey} />
+            <IconButton onClick={handelMessageSend} disabled={sendBtn}><SendRoundedIcon /></IconButton>
+
+          </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }
 

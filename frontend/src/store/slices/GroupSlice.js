@@ -130,6 +130,31 @@ export const sendGroupMessage = createAsyncThunk('sendGroupMessage',async(inputD
     }
 })
 
+//this is to delete group
+export const deleteGroup = createAsyncThunk('deleteGroup',async(id,{rejectWithValue})=>{
+    try {
+        
+        const requestOptions = {
+            method: "DELETE",
+            url: `http://localhost:8070/api/group/delete/${id}`,
+            headers: {
+                "Content-Type": "application/json",
+                "authToken": localStorage.getItem("authToken")
+            },
+        }
+
+        const response = await axios(requestOptions);
+        return response.data;
+
+    } catch (error) {
+        if (error.response) {
+            throw rejectWithValue({ message: error.response.data.message ? error.response.data.message : "Error Occured" });
+        } else {
+            throw rejectWithValue({ message: error.message ? error.message : "Error Occured" })
+        }
+    }
+})
+
 
 
 const GroupSlice = createSlice({
@@ -264,6 +289,29 @@ const GroupSlice = createSlice({
             state.sendLoading = false;
         })
 
+
+        //delete group
+        builder.addCase(deleteGroup.pending,(state,action)=>{
+            state.isLoading = true;
+            state.isError = false;
+            state.errorMessage = ""
+        })
+
+        builder.addCase(deleteGroup.fulfilled,(state,action)=>{
+            state.isLoading = false;
+            state.isError = false;
+            state.errorMessage = "";
+            let newGroups = state.groups.filter((group)=>{
+                return group._id !== action.payload.groupId
+            }) 
+            state.groups = newGroups
+        })
+
+        builder.addCase(deleteGroup.rejected,(state,action)=>{
+            state.isError = true;
+            state.errorMessage = action.payload.message;
+            state.isLoading = false;
+        })
     }
 })
 
