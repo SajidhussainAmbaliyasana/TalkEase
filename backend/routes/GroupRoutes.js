@@ -11,25 +11,50 @@ const {getGroupMembersID,getIo} = require('../socket')
 router.post('/create', checkUser, async (req, res) => {
     try {
 
+        // get the data from body
         let getData = {
             groupName: req.body.groupName,
             members: req.body.members,
             groupAdmin: req.user.id,
 
         }
+        
 
+        //add the one who have created the group
         getData.members.push(req.user.id)
 
+        //if less than 3 members dont allow to create group
         if (!getData.members.length > 2) {
             return res.status(500).json({ "message": "Minimum Three User Required To Create A Group", "success": false })
         }
 
+        //create group and save group
         const createGroup = new Group(getData);
         const saveGroup = await createGroup.save();
 
         if (!saveGroup) {
             return res.status(500).json({ "message": "Some Error Occured", "success": true });
         }
+
+        //socket part
+
+        //to get all the members but not the one who have created the group
+        const getLoggedInUserId = req.user.id
+        const members = getData.members.filter((user)=>{
+            return user !== getLoggedInUserId
+        });
+
+        // get all the socket id
+        const socketIds = getGroupMembersID(members);
+
+        const io = getIo();
+        // if the array is not empty then send the socket
+        if(socketIds.length !== 0){
+            if(io){
+                io.to(socketIds).emit("createGroup");
+            }
+        }
+        // console.log(socketIds);
 
         return res.status(200).json({ "data": saveGroup, "success": true });
 
@@ -51,6 +76,7 @@ router.post('/user', checkUser, async (req, res) => {
             return res.status(404).json({"message":'Id Not Found',"success":false});
         }
 
+        // fetch all the user and remove the paramter not required
         const findUser = await User.find({"_id":{"$ne":userId}},'-password -createdAt -updatedAt -__v')
 
         if(!findUser){
@@ -71,15 +97,12 @@ router.post('/find',checkUser,async(req,res)=>{
         
         const userId = req.user.id;
 
-        //find the groups 
+        //find the groups and reomve the paramter which are not required
         const findGroup =  await Group.find({
             members:{'$all':[userId]}
-        }).populate({
-            path:"members",
-            select:"-password -createdAt -updatedAt -__v -email"
-        }).select('-messages')
+        }).select('-messages -members -createdAt -updatedAt -__v -groupAdmin')
 
-        
+        //console.log(findGroup);
         if(!findGroup){
             return res.status(500).json({"message":"Cannot Fetch Groups","success":false});
         }
@@ -99,6 +122,7 @@ router.post('/chats/:id',checkUser,async(req,res)=>{
         const groupId = req.params.id;
         const userId = req.user.id;
 
+        //fetch all the chats and populate the chats and members and remove the paramter of members which are not requried
         const fetGroupChats = await Group.findById(groupId).populate("messages").populate({
             path:"members",
             select:"-password -createdAt -updatedAt -email -__v"
@@ -123,20 +147,29 @@ router.post('/send/:id',checkUser,async(req,res)=>{
         const groupId = req.params.id;
         const userId = req.user.id;
 
+        // get the user id and group id and fetch the group
         let fetchGroup = await Group.findById(groupId);
 
         if(!fetchGroup){
             return res.status(404).json({"message":"Group Not Found","success":false});
         }        
 
+        //convert all the user id into string
         let membersId = fetchGroup.members.map((user)=>{
             return user.toString();
         })
 
+        //console.log(membersId);
+
+        //remove the id of the loggedin user
         membersId = membersId.filter((id)=>{
             return id !== userId
         })
+
+        //console.log(membersId);
         // console.log(membersId);
+
+        //create message 
         const messageData={
             senderId:userId,
             groupId:groupId,
@@ -149,26 +182,31 @@ router.post('/send/:id',checkUser,async(req,res)=>{
             return res.status(500).json({"message":"Message Not Created","success":false});
         }
 
+        //push the message in the messages array in the group
         fetchGroup.messages.push(createMessage);
         
 
+        //save both the group and the message
         const saveData = await Promise.all([createMessage.save(),fetchGroup.save()]);
 
         if(!saveData){
             return res.status(500).json({"message":"Message Not Saved","success":false});
         }
 
-
-        //pending:-socket
-
-
+        //get all the socket id if the members if the group who are online 
         const socketIds = getGroupMembersID(membersId);
         //console.log(socketIds);
+        //console.log(socketIds);
         const io = getIo()
-        if(io){
-            io.to(socketIds).emit("groupMessage",createMessage)
-            // console.log("y");
+
+        //if there are members online send socket for realtime message
+        if(socketIds.length !== 0){
+            if(io){
+                io.to(socketIds).emit("groupMessage",createMessage)
+                // console.log("y");
+            }
         }
+        
 
         return res.status(200).json({"data":createMessage,"success":true});
         

@@ -57,8 +57,12 @@ router.post('/send/:id', checkUser, async (req, res) => {
     await Promise.all([chat.save(), newMessage.save()]);
 
     // Socket part
+
+    //get the socket id of the receiver
     const socketId = getUserSocketId(receiverID);
     const io = getIo();
+
+    //if the receiver is online send socket
     if (socketId) {
       io.to(socketId).emit("newMessage", newMessage)
 
@@ -130,6 +134,7 @@ router.post('/create/:id', checkUser, async (req, res) => {
       return res.status(500).json({ "message": "Chat Already Present", "success": false });
     }
 
+    
     let createChat = await Chat.create({
       users: [senderId, receiverId],
     });

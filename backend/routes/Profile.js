@@ -11,6 +11,7 @@ router.post('/getuser', checkUser, async (req, res) => {
 
         const userId = req.user.id;
 
+        // get all the chat and populat the members but not the password
         const conversation = await Chat.find({
             users: { "$all": [userId] }
         }).populate({

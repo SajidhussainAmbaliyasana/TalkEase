@@ -21,6 +21,14 @@ const GroupChatBox = ({socket}) => {
         setMessage(event.target.value);
     }
 
+    const scrollToBottom = () => {
+      const chatContainer = document.querySelector('.message');
+      if (chatContainer) {
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      }
+      
+    }
+
     const handelMessageSend = async()=>{
       try {
         if(message === ""){
@@ -58,16 +66,20 @@ const GroupChatBox = ({socket}) => {
       }
 
       setSendBtn(false);
+      scrollToBottom();
     }
 
 
     //socket useeffect
     useEffect(()=>{
 
+      scrollToBottom();
       if(socket){
         socket.on('groupMessage',(message)=>{
           //console.log(message);
           dispatch(addGroupMessage(message))
+          scrollToBottom();
+        //  console.log('this is called');
         })
 
         return  ()=>{
@@ -76,10 +88,16 @@ const GroupChatBox = ({socket}) => {
       }
     },[socket])
 
+
+    //to scroll bottom
+    useEffect(()=>{
+      scrollToBottom();
+    },[group.data.messages])
+
   return (
     <div className='chat-box'>
       <div className="chat-box-head">
-        <AvatarGroup max={3} total={group.data.members.length?group.data.members.length:3} className='chat-box-profile' >
+        <AvatarGroup max={4} total={group.data.members.length?group.data.members.length:3} className='chat-box-profile' >
             <Avatar alt={group.data.members[0].name? group.data.members[0].name:"user"} src='/aa' sx={{ bgcolor: "#698562" }}/>
             <Avatar alt={group.data.members[1].name?group.data.members[1].name:"user"} src='/aa' sx={{ bgcolor: "#698562" }}/>
             <Avatar alt={group.data.members[2].name?group.data.members[2].name:"users"} src='/aa' sx={{ bgcolor: "#698562" }}/>

@@ -127,16 +127,23 @@ const Homepage = () => {
         fetchFriends();
       })
 
+      socket.on("createGroup",()=>{
+        //console.log("created ");
+        fetchAllGroups();
+      })
+
       socket.on('disconnect',(reason)=>{
         console.log(reason);
         console.log(`socked off ${reason}`);
       })
+      
 
       return () => {
         if (socket) {
           socket.off('disconnect');
           socket.off('getOnlineUsers');
           socket.off('newChat');
+          socket.off("createGroup");
           socket.close();
         }
       };

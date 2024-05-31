@@ -33,6 +33,7 @@ const upload = multer({storage:storage})
 router.post('/create',async(req,res)=>{
     try {
         
+        //get the data
         const getData = {
             name:req.body.name,
             email:req.body.email,
@@ -40,6 +41,8 @@ router.post('/create',async(req,res)=>{
             image:""
         }
 
+
+        //check the existance
         const checkExistance = await User.findOne({"email":getData.email});
 
         if(checkExistance){
@@ -86,29 +89,34 @@ router.post('/create',async(req,res)=>{
 router.post('/login',async(req,res)=>{
     try {
         
+        //get the data
         const getData = {
             email:req.body.email,
             password:req.body.password
         }
 
+        // find the user
         const findUser = await User.findOne({"email":getData.email});
 
         if(!findUser){
             return res.status(404).json({"message":"Authnticate Using Valid Id and Password","success":false});
         }
 
+        //compare the password
         const comparePassowrd = await bcrypt.compare(getData.password,findUser.password);
 
         if(!comparePassowrd){
             return res.status(404).json({"message":"Authnticate Using Valid Id and Password","success":false});
         }
 
+        //set data to set in the request
         const data={
             user:{
                 id:findUser.id
             }
         }
 
+        //create the auth token
         const authToken = jwt.sign(data,JWT_SECRET);
 
         return res.status(200).json({"authToken":authToken,"success":true});
@@ -124,6 +132,7 @@ router.post('/fetch',checkUser,async(req,res)=>{
         
         const id = req.user.id;
     
+        //fetch the user not but the password
         const findUser = await User.findById(id).select('-password');
 
         if(!findUser){
