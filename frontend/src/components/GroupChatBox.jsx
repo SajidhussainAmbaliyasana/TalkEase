@@ -109,13 +109,16 @@ const GroupChatBox = ({ socket }) => {
 
   const handelCheckBoxChange = (id) => {
     if (userList.includes(id)) {
+      
       const newMembers = userList.filter((userId) => userId !== id);
       setUserList(newMembers);
-
+     
     } else {
+     
       let newMembers = userList;
       newMembers.push(id);
       setUserList(newMembers);
+      
 
     }
   }
@@ -131,14 +134,13 @@ const GroupChatBox = ({ socket }) => {
     }
 
     let groupMembers = group.data.members;
-    console.log(groupMembers);
 
     const updatedMembers = groupMembers.filter((user) => {
       return !userList.includes(user._id)
     })
 
-    console.log(updatedMembers);
-    if (updatedMembers.length > 3 ) {
+    
+    if (updatedMembers.length >= 3 ) {
       setRemoveModel(true);
     } else {
       const alertMessage = {
@@ -320,10 +322,10 @@ const GroupChatBox = ({ socket }) => {
     scrollToBottom();
     if (socket) {
       socket.on('groupMessage', (message) => {
-        //console.log(message);
+       
         dispatch(addGroupMessage(message))
         scrollToBottom();
-        //  console.log('this is called');
+       
       })
 
 
@@ -368,7 +370,7 @@ const GroupChatBox = ({ socket }) => {
               <ListItemText className='friend-name'>
                 {member.name} <p style={{ marginLeft: "3rem", color: "#536c4d" }}>{group.data.groupAdmin === member._id ? "Group Admin" : undefined}</p>
                 {user.data._id === group.data.groupAdmin && group.data.groupAdmin !== member._id ? (
-                  <Checkbox color='success' sx={{ marginLeft: "auto" }} onChange={() => handelCheckBoxChange(user._id)} />
+                  <Checkbox color='success' sx={{ marginLeft: "auto" }} onChange={() => handelCheckBoxChange(member._id)} />
                 ) : undefined}
               </ListItemText>
             </ListItem>

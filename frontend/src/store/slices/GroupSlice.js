@@ -169,7 +169,6 @@ export const removeMembers = createAsyncThunk('removeMembers',async(inputData,{r
         }
 
         const response = await axios(requestOptions);
-        console.log(`from api ${response.data}`);
         return response.data;
     } catch (error) {
         if (error.response) {
@@ -429,14 +428,10 @@ const GroupSlice = createSlice({
             state.isError = false;
             state.errorMessage = "";
             const removeIds = action.payload.data;
-            console.log(action.payload.data);
-            console.log(removeIds);
             let newMembers = state.data.members.filter((user)=>{
                 return !removeIds.includes(user._id);
             })
-            console.log(newMembers);
             state.data.members = newMembers
-            console.log(state.data.members);
         })
 
         builder.addCase(removeMembers.rejected,(state,action)=>{
