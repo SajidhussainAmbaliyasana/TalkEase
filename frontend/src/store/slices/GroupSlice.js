@@ -169,6 +169,7 @@ export const removeMembers = createAsyncThunk('removeMembers',async(inputData,{r
         }
 
         const response = await axios(requestOptions);
+        console.log(`from api ${response.data}`);
         return response.data;
     } catch (error) {
         if (error.response) {
@@ -202,7 +203,52 @@ export const leaveGroup = createAsyncThunk('leaveGroup',async(id,{rejectWithValu
     }
 })
 
+export const fetchMembers = createAsyncThunk('fetchMembers',async(id,{rejectWithValue})=>{
+    try {
+        
+        const requestOptions = {
+            method: "POST",
+            url: `http://localhost:8070/api/group/fetch/${id}`,
+            headers: {
+                "Content-Type": "application/json",
+                "authToken": localStorage.getItem("authToken")
+            },
+        }
 
+        const response = await axios(requestOptions);
+        return response.data;
+    } catch (error) {
+        if (error.response) {
+            throw rejectWithValue({ message: error.response.data.message ? error.response.data.message : "Error Occured" });
+        } else {
+            throw rejectWithValue({ message: error.message ? error.message : "Error Occured" })
+        }
+    }
+})
+
+export const addMembers = createAsyncThunk("addMembers",async(inputData,{rejectWithValue})=>{
+    try {
+        
+        const requestOptions = {
+            method: "PATCH",
+            url: `http://localhost:8070/api/group/addmember/${inputData.id}`,
+            headers: {
+                "Content-Type": "application/json",
+                "authToken": localStorage.getItem("authToken")
+            },
+            data:{members:inputData.members}
+        }
+
+        const response = await axios(requestOptions);
+        return response.data;
+    } catch (error) {
+        if (error.response) {
+            throw rejectWithValue({ message: error.response.data.message ? error.response.data.message : "Error Occured" });
+        } else {
+            throw rejectWithValue({ message: error.message ? error.message : "Error Occured" })
+        }
+    }
+})
 
 const GroupSlice = createSlice({
     name: "group",
@@ -213,9 +259,11 @@ const GroupSlice = createSlice({
         createLoading: false,
         chatLoading:false,
         sendLoading:false,
+        addLoading:false,
         data: [],
         users: [],
         groups:[],
+        members:[],
         userId:""
     },reducers:{
 
@@ -381,10 +429,14 @@ const GroupSlice = createSlice({
             state.isError = false;
             state.errorMessage = "";
             const removeIds = action.payload.data;
+            console.log(action.payload.data);
+            console.log(removeIds);
             let newMembers = state.data.members.filter((user)=>{
                 return !removeIds.includes(user._id);
             })
+            console.log(newMembers);
             state.data.members = newMembers
+            console.log(state.data.members);
         })
 
         builder.addCase(removeMembers.rejected,(state,action)=>{
@@ -418,6 +470,49 @@ const GroupSlice = createSlice({
             state.isError = true;
             state.errorMessage = action.payload.message;
             state.isLoading = false;
+        })
+
+        //this is to fetch the user who are not members
+        builder.addCase(fetchMembers.pending,(state,action)=>{
+            state.isLoading = true;
+            state.isError = false;
+            state.errorMessage = "";
+            state.members = [];
+        })
+
+        builder.addCase(fetchMembers.fulfilled,(state,action)=>{
+            state.isLoading = false;
+            state.isError = false;
+            state.errorMessage = "";
+            state.members = action.payload.data;
+        })
+
+        builder.addCase(fetchMembers.rejected,(state,action)=>{
+            state.isError = true;
+            state.errorMessage = action.payload.message;
+            state.isLoading = false;
+            state.members = [];
+        })
+
+        //add members
+        builder.addCase(addMembers.pending,(state,action)=>{
+            state.addLoading = true;
+            state.isError = false;
+            state.errorMessage = ""
+        })
+
+        builder.addCase(addMembers.fulfilled,(state,action)=>{
+            state.isLoading = false;
+            state.isError = false;
+            state.errorMessage = "";
+            const newMembers = state.data.members.concat(action.payload.data);
+            state.data.members = newMembers;
+        })
+
+        builder.addCase(addMembers.rejected,(state,action)=>{
+            state.isError = true;
+            state.errorMessage = action.payload.message;
+            state.addLoading = false;
         })
     }
 })

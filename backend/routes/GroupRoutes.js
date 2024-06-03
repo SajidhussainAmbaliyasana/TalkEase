@@ -373,4 +373,66 @@ router.patch('/leave/:id',checkUser,async(req,res)=>{
         return res.status(500).json({"message":"Internal Server Error","success":false});
     }
 })
+
+// this route is to fetch all the users who are not the members of the group
+router.post('/fetch/:id',checkUser,async(req,res)=>{
+    try {
+        
+        const groupId = req.params.id;
+
+        if(!groupId){
+            return res.status(404).json({"message":"Group Id Not Found","success":false});
+        }
+
+        let allUsers = await User.find({}).select("-password -createdAt -updatedAt -__v");
+
+        if(!allUsers){
+            return res.status(404).json({"message":"User Not Fetched","success":false});
+        }
+        
+        let groupMembers = await Group.findById(groupId).select("members");
+
+        if(!groupMembers){
+            return res.status(404).json({"message":"Group Not Found","success":false});
+        }
+
+        const filterUSers = allUsers.filter((user)=>{
+            return !groupMembers.members.includes(user._id)
+        })
+
+        return res.status(200).json({"data":filterUSers,"success":true})
+        
+
+    } catch (error) {
+        console.log(`from /fetch ${error}`);
+        return res.status(500).json({"message":"Internal Server Error","success":false});
+    }
+})
+
+router.patch('/addmember/:id',checkUser,async(req,res)=>{
+    try {
+        
+        const groupId = req.params.id;
+        const newMembersData = req.body.members;
+
+        const members = await User.find({"_id":{"$in":newMembersData}}).select("_id name image");
+
+        const findGroup = await Group.findById(groupId).select("members");
+
+        const newMembers = findGroup.members.concat(newMembersData);
+
+        const updateMembers = await Group.findByIdAndUpdate(groupId,{"members":newMembers});
+
+        if(!updateMembers){
+            return res.status(500).json({"message":"Not Updated","success":false})
+        }
+
+        return res.status(200).json({"data":members,"success":true});
+
+    } catch (error) {
+        console.log(`from '/addmember ${error}`);
+        return res.status(500).json({"message":"Internal Server Error","success":false});
+    }
+})
+
 module.exports = router;
