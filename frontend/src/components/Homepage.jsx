@@ -147,7 +147,12 @@ const Homepage = () => {
 
       socket.on('leaveGroup',(id)=>{
         dispatch(clearGroupChat());
-        console.log(id);
+        // console.log(id);
+      })
+
+      socket.on('addMember',()=>{
+        fetchAllGroups();
+        dispatch(clearGroupChat());
       })
 
       socket.on('disconnect',(reason)=>{
@@ -164,6 +169,7 @@ const Homepage = () => {
           socket.off('deleteGroup');
           socket.off("removeMember");
           socket.off("leaveGroup");
+          socket.off("addMember");
           socket.off('disconnect');
           socket.close();
         }

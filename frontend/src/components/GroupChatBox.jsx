@@ -105,6 +105,8 @@ const GroupChatBox = ({ socket }) => {
 
   const handelRemoveClose = () => {
     setRemoveModel(false);
+    setUserList([]);
+    setInfoModel(false);
   }
 
   const handelCheckBoxChange = (id) => {
@@ -130,6 +132,7 @@ const GroupChatBox = ({ socket }) => {
         type: "error"
       }
       dispatch(setAlert(alertMessage));
+      setUserList([]);
       return;
     }
 
@@ -148,6 +151,7 @@ const GroupChatBox = ({ socket }) => {
         type: "error"
       }
       dispatch(setAlert(alertMessage));
+      setUserList([]);
       return;
     }
   }
@@ -168,15 +172,18 @@ const GroupChatBox = ({ socket }) => {
         dispatch(setAlert(alertMessage));
         setRemoveBtn(false);
         setRemoveModel(false);
+        setUserList([]);
         return;
       }
     } catch (error) {
       console.error(error);
       setRemoveBtn(false);
       setRemoveModel(false);
+      setUserList([]);
     }
     setRemoveBtn(false);
     setRemoveModel(false);
+    setUserList([]);
   }
 
   //delete group
@@ -267,6 +274,7 @@ const GroupChatBox = ({ socket }) => {
 
   const addClose = () => {
     setAddModal(false);
+    setMembers([]);
   }
 
   const handelAddChange = (id) => {
@@ -291,6 +299,7 @@ const GroupChatBox = ({ socket }) => {
           type: "error"
         }
         dispatch(setAlert(alertMessage));
+        setMembers([]);
         return;
       }
       setAddBtn(true);
@@ -306,14 +315,17 @@ const GroupChatBox = ({ socket }) => {
         }
         dispatch(setAlert(alertMessage));
         setAddBtn(false)
+        setMembers([]);
         return;
       }
     } catch (error) { 
       console.error(error)
       setAddBtn(false);
+      setMembers([]);
     }
     setAddModal(false);
     setAddBtn(false);
+    setMembers([]);
   }
 
   //socket useeffect

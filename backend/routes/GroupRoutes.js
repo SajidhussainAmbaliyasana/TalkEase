@@ -414,10 +414,24 @@ router.patch('/addmember/:id',checkUser,async(req,res)=>{
         
         const groupId = req.params.id;
         const newMembersData = req.body.members;
+        const userId = req.user.id
 
         const members = await User.find({"_id":{"$in":newMembersData}}).select("_id name image");
+       
 
+        const memberIdString = members.map((user)=>{
+            return user._id.toString();
+        })
+
+       
         const findGroup = await Group.findById(groupId).select("members");
+
+        
+        const oldMembersIdString = findGroup.members.map((user)=>{
+            return user.toString();
+        })
+
+        
 
         const newMembers = findGroup.members.concat(newMembersData);
 
@@ -427,6 +441,21 @@ router.patch('/addmember/:id',checkUser,async(req,res)=>{
             return res.status(500).json({"message":"Not Updated","success":false})
         }
 
+        const mergeIds = memberIdString.concat(oldMembersIdString);
+        const filteredId = mergeIds.filter((user)=>{
+            return user !== userId
+        })
+
+        const getSocketIds = getGroupMembersID(filteredId);
+        const io = getIo();
+
+        if(getSocketIds.length > 0){
+            if(io){
+                io.to(getSocketIds).emit("addMember");
+            }
+        }
+
+        
         return res.status(200).json({"data":members,"success":true});
 
     } catch (error) {
