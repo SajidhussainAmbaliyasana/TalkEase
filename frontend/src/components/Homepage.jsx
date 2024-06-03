@@ -12,7 +12,7 @@ import { updateUsers } from '../store/slices/OnlineUser'
 import { fetchGroups } from '../store/slices/GroupSlice'
 import Groups from './Groups'
 import GroupChatBox from './GroupChatBox'
-import { clearGroupChat } from '../store/slices/GroupSlice'
+import { clearGroupChat,removeUser } from '../store/slices/GroupSlice'
 import { clearMessage } from '../store/slices/MessageSlice'
 
 const Homepage = () => {
@@ -132,6 +132,24 @@ const Homepage = () => {
         fetchAllGroups();
       })
 
+      socket.on("deleteGroup",()=>{
+        // console.log(id);
+        fetchAllGroups();
+        dispatch(clearGroupChat());
+
+      })
+
+      socket.on("removeMember",()=>{
+        dispatch(clearGroupChat())
+        fetchAllGroups();
+        console.log("removed");
+      })
+
+      socket.on('leaveGroup',(id)=>{
+        dispatch(clearGroupChat());
+        console.log(id);
+      })
+
       socket.on('disconnect',(reason)=>{
         console.log(reason);
         console.log(`socked off ${reason}`);
@@ -140,10 +158,13 @@ const Homepage = () => {
 
       return () => {
         if (socket) {
-          socket.off('disconnect');
           socket.off('getOnlineUsers');
           socket.off('newChat');
           socket.off("createGroup");
+          socket.off('deleteGroup');
+          socket.off("removeMember");
+          socket.off("leaveGroup");
+          socket.off('disconnect');
           socket.close();
         }
       };

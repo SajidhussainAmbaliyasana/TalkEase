@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import './style.css'
 import { useSelector, useDispatch } from 'react-redux'
-import {  Avatar, AvatarGroup, Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, ListItem, ListItemAvatar, ListItemText, TextField, Typography,CircularProgress } from '@mui/material'
+import { Avatar, AvatarGroup, Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, ListItem, ListItemAvatar, ListItemText, TextField, Typography, CircularProgress } from '@mui/material'
 import SendRoundedIcon from '@mui/icons-material/SendRounded';
-import { sendGroupMessage } from '../store/slices/GroupSlice';
+import { sendGroupMessage, removeMembers,leaveGroup } from '../store/slices/GroupSlice';
 import { setAlert } from '../store/slices/AlertSlice';
 import GroupMessage from './GroupMessage';
 import { addGroupMessage } from '../store/slices/GroupSlice';
@@ -18,11 +18,15 @@ const GroupChatBox = ({ socket }) => {
   const [sendBtn, setSendBtn] = useState(false);
   const [infoModel, setInfoModel] = useState(false);
   const [userList, setUserList] = useState([]);
-  const [deleteModal,setDeleteMoal] = useState(false);
-  const [deleteBtn,setDeleteBtn] = useState(false);
+  const [deleteModal, setDeleteMoal] = useState(false);
+  const [deleteBtn, setDeleteBtn] = useState(false);
+  const [removeModal, setRemoveModel] = useState(false);
+  const [removeBtn, setRemoveBtn] = useState(false);
+  const [leaveModal, setLeaveModal] = useState(false);
+  const [leaveBtn, setLeaveBtn] = useState(false);
 
   const group = useSelector((state) => { return state.group });
-  const user = useSelector((state) => {return state.user});
+  const user = useSelector((state) => { return state.user });
 
   //send message
   const handelMessageChange = (event) => {
@@ -94,6 +98,12 @@ const GroupChatBox = ({ socket }) => {
     setUserList([]);
   }
 
+  //remove
+
+  const handelRemoveClose = () => {
+    setRemoveModel(false);
+  }
+
   const handelCheckBoxChange = (id) => {
     if (userList.includes(id)) {
       const newMembers = userList.filter((userId) => userId !== id);
@@ -107,8 +117,7 @@ const GroupChatBox = ({ socket }) => {
     }
   }
 
-  const handelRemoveClick = () => {
-
+  const handelRemoveBtn = () => {
     if (userList.length === 0) {
       const alertMessage = {
         message: "Select Members To Remove",
@@ -118,51 +127,70 @@ const GroupChatBox = ({ socket }) => {
       return;
     }
 
+    let groupMembers = group.data.members;
+
+    const updatedMembers = groupMembers.filter((user) => {
+      return !userList.includes(user._id)
+    })
+
+    if (updatedMembers.length >= 3) {
+      setRemoveModel(true);
+    } else {
+      const alertMessage = {
+        message: "A group cannot have less than 3 members",
+        type: "error"
+      }
+      dispatch(setAlert(alertMessage));
+      return;
+    }
+  }
+
+  const handelRemoveClick = async () => {
     try {
-
-      let groupMembers = group.data.members;
-
-      const updatedMembers = groupMembers.filter((user) => {
-        return !userList.includes(user._id)
-      })
-
-
-      if (updatedMembers.length >= 3) {
-        console.log("yes");
-
-      } else {
+      setRemoveBtn(true);
+      const enterData = {
+        id: group.data._id,
+        members: userList
+      }
+      const response = await dispatch(removeMembers(enterData));
+      if (!response.payload.success) {
         const alertMessage = {
-          message: "A group cannot have less than 3 members",
+          message: response.payload.message,
           type: "error"
         }
         dispatch(setAlert(alertMessage));
+        setRemoveBtn(false);
+        setRemoveModel(false);
         return;
       }
-
     } catch (error) {
-      console.error(error)
+      console.error(error);
+      setRemoveBtn(false);
+      setRemoveModel(false);
     }
+    setRemoveBtn(false);
+    setRemoveModel(false);
   }
 
   //delete group
 
-  const deleteModelOpen = ()=>{
+  const deleteModelOpen = () => {
     setDeleteMoal(true);
   }
 
-  const deleteModelClose = ()=>{
+  const deleteModelClose = () => {
     setDeleteMoal(false);
   }
 
-  const handelGroupDelete = async()=>{
+  const handelGroupDelete = async () => {
     try {
       setDeleteBtn(true);
       const groupId = group.data._id;
       const response = await dispatch(deleteGroup(groupId));
-      if(!response.payload.success){
+      if (!response.payload.success) {
         const alertMessage = {
-          message:response.payload.message,
-          type:"error"
+          message: response.payload.message,
+          type: "error"
         }
         dispatch(setAlert(alertMessage));
         setDeleteBtn(false);
@@ -176,8 +204,38 @@ const GroupChatBox = ({ socket }) => {
     setDeleteBtn(false);
     setDeleteMoal(false);
     setInfoModel(false);
-    
+  }
 
+  //leave group
+
+  const handelLeaveClick = () => {
+    setLeaveModal(true)
+  }
+
+  const leaveClose = () => {
+    setLeaveModal(false);
+  }
+
+  const handelLeaveSubmit = async() => {
+    try {
+      setLeaveBtn(true);
+      const groupId = group.data._id;
+      const response = await dispatch(leaveGroup(groupId));
+      if (!response.payload.success) {
+        const alertMessage = {
+          message: response.payload.message,
+          type: "error"
+        }
+        dispatch(setAlert(alertMessage));
+        setLeaveBtn(false);
+        return;
+      }
+    } catch (error) {
+      console.error(error);
+      setLeaveBtn(false);
+    }
+    setLeaveBtn(false);
+    dispatch(clearGroupChat());
   }
 
 
@@ -192,6 +250,8 @@ const GroupChatBox = ({ socket }) => {
         scrollToBottom();
         //  console.log('this is called');
       })
+
+
 
       return () => {
         socket.off("groupMessage")
@@ -225,55 +285,90 @@ const GroupChatBox = ({ socket }) => {
         <DialogContent dividers className='add-friend-dialog'>
           <Typography className='dialog-title' fontSize="1.5rem">Group Members</Typography>
 
-          {group.data && group.data.members && group.data.members.map((user) => {
-            return <ListItem key={user._id} alignItems='flex-start' className='friend-list'>
+          {group.data && group.data.members && group.data.members.map((member) => {
+            return <ListItem key={member._id} alignItems='flex-start' className='friend-list'>
               <ListItemAvatar>
-                <Avatar alt={user.name} src="/ss" sx={{ bgcolor: "#698562" }} />
+                <Avatar alt={member.name} src="/ss" sx={{ bgcolor: "#698562" }} />
               </ListItemAvatar>
               <ListItemText className='friend-name'>
-                {user.name} <p style={{ marginLeft: "3rem", color: "#536c4d" }}>{group.data.groupAdmin === user._id ? "Group Admin" : undefined}</p>
-                {user._id !== group.data.groupAdmin ? (<Checkbox color='success' sx={{ marginLeft: "auto" }} onChange={() => handelCheckBoxChange(user._id)} />) : undefined}
+                {member.name} <p style={{ marginLeft: "3rem", color: "#536c4d" }}>{group.data.groupAdmin === member._id ? "Group Admin" : undefined}</p>
+                {group.data.groupAdmin === user._id ? (<Checkbox color='success' sx={{ marginLeft: "auto" }} onChange={() => handelCheckBoxChange(user._id)} />) : undefined}
               </ListItemText>
             </ListItem>
           })}
         </DialogContent>
         <DialogActions>
-          
+
           {user.data._id === group.data.groupAdmin ? (
-          <>
-          <Button color='success' variant='outlined' onClick={handelRemoveClick}>Remove</Button>
-          <Button color='success' variant='outlined' onClick={deleteModelOpen}>Delete Group</Button>
-          </>):(
-            <Button color='success' variant='outlined'>Leave Group</Button>
+            <>
+              <Button color='success' variant='outlined' onClick={handelRemoveBtn}>Remove</Button>
+              <Button color='success' variant='outlined' onClick={deleteModelOpen}>Delete Group</Button>
+            </>) : (
+            <Button color='success' variant='outlined' onClick={handelLeaveClick}>Leave Group</Button>
           )}
-           {/* <Button color='success' variant='outlined'>Delete Group</Button> */}
+          {/* <Button color='success' variant='outlined'>Delete Group</Button> */}
         </DialogActions>
 
       </Dialog>
 
       <Dialog
-      open={deleteModal}
-      onClose={deleteModelClose}
-      fullWidth
+        open={deleteModal}
+        onClose={deleteModelClose}
+        fullWidth
       >
         <DialogTitle display="flex" className='dialog-title'>
-          Are You Sure You Want To Delete 
+          Are You Sure You Want To Delete
           <IconButton sx={{ marginLeft: "auto" }} onClick={deleteModelClose}><CloseIcon /></IconButton>
         </DialogTitle>
-        <DialogContent dividers sx={{display:"flex",justifyContent:"center",alignItems:"center"}}>
-          <Button color='error' variant='outlined' sx={{width:"80%"}} onClick={handelGroupDelete} disabled={deleteBtn}>
-            {deleteBtn? (<CircularProgress color="error" />):"Delete"}
-            </Button>
+        <DialogContent dividers sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+          <Button color='error' variant='outlined' sx={{ width: "80%" }} onClick={handelGroupDelete} disabled={deleteBtn}>
+            {deleteBtn ? (<CircularProgress color="error" />) : "Delete"}
+          </Button>
         </DialogContent>
 
       </Dialog>
 
+      <Dialog
+        open={removeModal}
+        onClose={handelRemoveClose}
+        fullWidth
+      >
+        <DialogTitle display="flex" className='dialog-title'>
+          Are You Sure You Want To Remove Selected Members
+          <IconButton sx={{ marginLeft: "auto" }} onClick={handelRemoveClose}><CloseIcon /></IconButton>
+        </DialogTitle>
+        <DialogContent dividers sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+          <Button color='error' variant='outlined' sx={{ width: "80%" }} onClick={handelRemoveClick} disabled={removeBtn}>
+            {removeBtn ? (<CircularProgress color="error" />) : "Remove"}
+          </Button>
+        </DialogContent>
+
+      </Dialog>
+
+      <Dialog
+        open={leaveModal}
+        onClose={leaveClose}
+        fullWidth
+      >
+        <DialogTitle display="flex" className='dialog-title'>
+          Are You Sure You Want To Leave Group
+          <IconButton sx={{ marginLeft: "auto" }} onClick={leaveClose}><CloseIcon /></IconButton>
+        </DialogTitle>
+        <DialogContent dividers sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+          <Button color='error' variant='outlined' sx={{ width: "80%" }} disabled={leaveBtn} onClick={handelLeaveSubmit}>
+            {leaveBtn ? (<CircularProgress color="error" />) : "Leave"}
+          </Button>
+        </DialogContent>
+
+      </Dialog>
+
+
       <div className='chat-box'>
         <div className="chat-box-head">
           <AvatarGroup max={4} total={group.data.members.length ? group.data.members.length : 3} className='chat-box-profile' >
-            <Avatar alt={group.data.members[0].name ? group.data.members[0].name : "user"} src='/aa' sx={{ bgcolor: "#698562" }} />
-            <Avatar alt={group.data.members[1].name ? group.data.members[1].name : "user"} src='/aa' sx={{ bgcolor: "#698562" }} />
-            <Avatar alt={group.data.members[2].name ? group.data.members[2].name : "users"} src='/aa' sx={{ bgcolor: "#698562" }} />
+            {group.data && group.data.members && group.data.members.map((user)=>{
+              return <Avatar key={user._id} alt={user.name} src='/aa' sx={{ bgcolor: "#698562" }} />
+            })}
           </AvatarGroup>
           <p>{group.data.groupName ? group.data.groupName : "Group"}</p>
           <Button sx={{ marginLeft: "auto", marginRight: "1rem" }} variant='outlined' color='success' onClick={handelInfoOpen}>Group Info</Button>

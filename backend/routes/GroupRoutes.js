@@ -217,7 +217,7 @@ router.post('/send/:id',checkUser,async(req,res)=>{
     }
 })
 
-//this route is to remove the members of the group
+//this route is to remove the members of the group this can be do by admin
 router.patch('/remove/:id',checkUser,async(req,res)=>{
     try {
         
@@ -225,8 +225,10 @@ router.patch('/remove/:id',checkUser,async(req,res)=>{
         const groupId = req.params.id;
         const idOfRemoveUser = req.body.members;
 
+
         //find the group
         let findGroup = await Group.findById(groupId);
+
 
         if(!findGroup){
             return res.status(404).json({"message":"Group Not Found","success":false});
@@ -243,8 +245,15 @@ router.patch('/remove/:id',checkUser,async(req,res)=>{
         if(!updateGroup){
             return res.status(500).json({"message":"Group Not Updated","success":false});
         }
+
+        //socket part
+        const removeMembersSocket = getGroupMembersID(idOfRemoveUser);
+        const io = getIo();
+        if(removeMembersSocket.length > 0){
+            io.to(removeMembersSocket).emit("removeMember")
+        }
         
-        return res.status(200).json({"data":updateGroup.members,"success":true});
+        return res.status(200).json({"data":idOfRemoveUser,"success":true});
     } catch (error) {
         console.log(`from /remove ${error}`);
         return res.status(500).json({"message":"Internal Sever Error","success":false});
@@ -257,10 +266,12 @@ router.delete('/delete/:id',checkUser,async(req,res)=>{
     try {
         
         const groupId = req.params.id;
-        
+        const loggedinUser = req.user.id;
+
         if(groupId === ""){
             return res.status(404).json({"message":"Group Id Not Found","success":false});
         }
+
 
         const findGroup = await Group.findById(groupId).select("-groupName -groupAdmin -image -createdAt -updatedAt -__v");
 
@@ -269,6 +280,10 @@ router.delete('/delete/:id',checkUser,async(req,res)=>{
         }
 
         const messagesIdToDelete = findGroup.messages;
+
+        // get all the members id which would be further used for socket
+        let membersId = findGroup.members
+        // console.log(membersId);
       
         const [deleteMessages,deleteGroup] = await Promise.all([
             GroupMessage.deleteMany({"_id":{"$in":messagesIdToDelete}}),
@@ -277,14 +292,84 @@ router.delete('/delete/:id',checkUser,async(req,res)=>{
 
         if(!deleteMessages && !deleteGroup){
             return res.status(500).json({"message":"Some Error Occured","success":false});
+        }   
+
+        //covert the members id to string
+        membersId = membersId.map((id)=>{
+            return id.toString();
+        })
+
+        //remove the id of the loggedin user
+        membersId = membersId.filter((id) =>{
+            return id !== loggedinUser;
+        })
+
+        // get the socket id from io
+        const socketIds = getGroupMembersID(membersId);
+        const io = getIo();
+
+        // if there are socket id then send the socket
+        if(socketIds.length > 0){
+            if(io){
+                io.to(socketIds).emit("deleteGroup");
+            }
         }
 
-
-        //to be add socket
         return res.status(200).json({"success":true,"groupId":groupId});
 
     } catch (error) {
         console.log(`from /delete ${error}`);
+        return res.status(500).json({"message":"Internal Server Error","success":false});
+    }
+})
+
+
+//this route is to leave group
+router.patch('/leave/:id',checkUser,async(req,res)=>{
+    try {
+        
+        const userId = req.user.id;
+        const groupId = req.params.id;
+
+        if(!userId || !groupId){
+            return res.status(404).json({"message":"Id Not Found","success":false});
+        }
+
+        const findGroup = await Group.findById(groupId);
+
+        if(!findGroup){
+            return res.status(404).json({"message":"Group Not Found","success":false});
+        }
+
+        const groupMembers = findGroup.members;
+
+        const groupMembersId = groupMembers.map((user)=>{
+            return user._id.toString();
+        })
+
+        
+        const newMembers = groupMembersId.filter((user)=>{
+            return user !== userId
+        })
+        
+        const updateGroup = await Group.findByIdAndUpdate(groupId,{"members":newMembers});
+
+        if(!updateGroup){
+            return res.status(500).json({"message":"Group Not Updated","success":false});
+        }
+
+        //socket part
+        const getGroupMembersSocket = getGroupMembersID(newMembers);
+        const io = getIo();
+        if(getGroupMembersSocket.length > 0){
+            if(io){
+                io.to(getGroupMembersSocket).emit("leaveGroup",userId);
+            }
+        }
+
+        return res.status(200).json({"data":userId,"groupId":groupId,"success":true});
+    } catch (error) {
+        console.log(`from /leave ${error}`);
         return res.status(500).json({"message":"Internal Server Error","success":false});
     }
 })

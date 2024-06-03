@@ -155,6 +155,53 @@ export const deleteGroup = createAsyncThunk('deleteGroup',async(id,{rejectWithVa
     }
 })
 
+export const removeMembers = createAsyncThunk('removeMembers',async(inputData,{rejectWithValue})=>{
+    try {
+        
+        const requestOptions = {
+            method: "PATCH",
+            url: `http://localhost:8070/api/group/remove/${inputData.id}`,
+            headers: {
+                "Content-Type": "application/json",
+                "authToken": localStorage.getItem("authToken")
+            },
+            data:{members:inputData.members}
+        }
+
+        const response = await axios(requestOptions);
+        return response.data;
+    } catch (error) {
+        if (error.response) {
+            throw rejectWithValue({ message: error.response.data.message ? error.response.data.message : "Error Occured" });
+        } else {
+            throw rejectWithValue({ message: error.message ? error.message : "Error Occured" })
+        }
+    }
+})
+
+export const leaveGroup = createAsyncThunk('leaveGroup',async(id,{rejectWithValue})=>{
+    try {
+        
+        const requestOptions = {
+            method: "PATCH",
+            url: `http://localhost:8070/api/group/leave/${id}`,
+            headers: {
+                "Content-Type": "application/json",
+                "authToken": localStorage.getItem("authToken")
+            },
+        }
+
+        const response = await axios(requestOptions);
+        return response.data;
+    } catch (error) {
+        if (error.response) {
+            throw rejectWithValue({ message: error.response.data.message ? error.response.data.message : "Error Occured" });
+        } else {
+            throw rejectWithValue({ message: error.message ? error.message : "Error Occured" })
+        }
+    }
+})
+
 
 
 const GroupSlice = createSlice({
@@ -178,7 +225,16 @@ const GroupSlice = createSlice({
 
         addGroupMessage:(state,action)=>{
             state.data.messages.push(action.payload);
+        },
+
+        removeUser:(state,action)=>{
+            const newMembers = state.data.members.filter((user)=>{
+                return user._id !== action.payload
+            })
+
+            state.data.members = newMembers
         }
+
     }, extraReducers: (builder) => {
 
         //to fetch user
@@ -312,9 +368,60 @@ const GroupSlice = createSlice({
             state.errorMessage = action.payload.message;
             state.isLoading = false;
         })
+
+        //remove memebers done by admin
+        builder.addCase(removeMembers.pending,(state,action)=>{
+            state.isLoading = true;
+            state.isError = false;
+            state.errorMessage = "";
+        })
+
+        builder.addCase(removeMembers.fulfilled,(state,action)=>{
+            state.isLoading = false;
+            state.isError = false;
+            state.errorMessage = "";
+            const removeIds = action.payload.data;
+            let newMembers = state.data.members.filter((user)=>{
+                return !removeIds.includes(user._id);
+            })
+            state.data.members = newMembers
+        })
+
+        builder.addCase(removeMembers.rejected,(state,action)=>{
+            state.isError = true;
+            state.errorMessage = action.payload.message;
+            state.isLoading = false;
+        })
+
+        //leave group
+        builder.addCase(leaveGroup.pending,(state,action)=>{
+            state.isLoading = true;
+            state.isError = false;
+            state.errorMessage = ""
+        })
+
+        builder.addCase(leaveGroup.fulfilled,(state,action)=>{
+            state.isLoading = false;
+            state.isError = false;
+            state.errorMessage = "";
+            const newMembers = state.data.members.filter((user)=>{
+                return user !== action.payload.data
+            })
+            state.data.members = newMembers
+            let newGroups = state.groups.filter((group)=>{
+                return group._id !== action.payload.groupId
+            }) 
+            state.groups = newGroups
+        })
+
+        builder.addCase(leaveGroup.rejected,(state,action)=>{
+            state.isError = true;
+            state.errorMessage = action.payload.message;
+            state.isLoading = false;
+        })
     }
 })
 
 
 export default GroupSlice.reducer;
-export const {clearGroupChat,addGroupMessage} = GroupSlice.actions;
+export const {clearGroupChat,addGroupMessage,removeUser} = GroupSlice.actions;
