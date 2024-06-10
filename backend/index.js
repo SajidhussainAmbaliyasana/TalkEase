@@ -21,13 +21,14 @@ app.use(cors());
 app.use(morganMiddelware);
 
 app.use('/uploads', express.static(__dirname + '/uploads'));
+app.use(express.static((__dirname, '/log')));
 
 //routes
 app.use('/api/user', require('./routes/UserRoutes'));
 app.use('/api/message', require('./routes/MessageRoutes'));
 app.use('/api/profile', require('./routes/Profile'));
 app.use('/api/group',require('./routes/GroupRoutes'));
-
+app.use('/api/logs',require('./routes/Logs'));
 
 
 server.listen(port, () => {

@@ -1,0 +1,20 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 10
+    },
+    "auditLog": "E:\\Pardy Panda\\Learning\\TalkEase\\backend\\log\\.12a4d5148feef45da92190e200f46a6972c046ee-audit.json",
+    "files": [
+        {
+            "date": 1723975712973,
+            "name": "E:\\Pardy Panda\\Learning\\TalkEase\\backend\\log\\allLog-2024-08-18.log",
+            "hash": "4a3f7ca961296825c7896bb7d5476bf9023a2ad911d323985563c898fc3cd524"
+        },
+        {
+            "date": 1718014161588,
+            "name": "E:\\Pardy Panda\\Learning\\TalkEase\\backend\\log\\allLog-2024-06-10.log",
+            "hash": "17ce2f18840e6fbad10e21f79ee9563a598d58446f3b3863a3299f920d8d0d3e"
+        }
+    ],
+    "hashType": "sha256"
+}

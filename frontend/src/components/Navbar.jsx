@@ -486,7 +486,8 @@ const Navbar = () => {
 
       </Dialog>
 
-      <div className={location.pathname === '/' ? 'no-nav' : 'navbar'}>
+      {location.pathname !== "/" && (
+        <div className='navbar'>
         <div className="image-box">
           <img src={logo} alt="logo" />
         </div>
@@ -501,11 +502,6 @@ const Navbar = () => {
               <PeopleOutlineRoundedIcon />
             </IconButton>
           </Tooltip>
-          {/* <Tooltip title="Notification">
-            <IconButton>
-              <NotificationsActiveRoundedIcon />
-            </IconButton>
-          </Tooltip> */}
           <IconButton onClick={handelLogout}>
             <LogoutRoundedIcon />
           </IconButton>
@@ -516,6 +512,33 @@ const Navbar = () => {
           </Tooltip>
         </div>
       </div>
+      )}
+
+      {/* <div className={location.pathname === '/' ? 'no-nav' : 'navbar'}>
+        <div className="image-box">
+          <img src={logo} alt="logo" />
+        </div>
+        <div className="nav-btn-box">
+          <Tooltip title="Create Group">
+            <IconButton onClick={groupModelOpen}>
+              <AddRoundedIcon />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Add Friend">
+            <IconButton onClick={handelFriendModelOpen}>
+              <PeopleOutlineRoundedIcon />
+            </IconButton>
+          </Tooltip>
+          <IconButton onClick={handelLogout}>
+            <LogoutRoundedIcon />
+          </IconButton>
+          <Tooltip title="Profile">
+            {user.isLoading ? (<Skeleton variant='circular' width={40} height={40} />) :
+              (<Avatar alt={user.data.name} src={`http://localhost:8070/uploads/${user.data.image}`} sx={{ bgcolor: "#698562", cursor: "pointer" }} onClick={handelProfileOpen} />)}
+
+          </Tooltip>
+        </div>
+      </div> */}
     </>
   );
 };
