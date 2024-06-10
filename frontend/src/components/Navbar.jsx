@@ -369,7 +369,7 @@ const Navbar = () => {
 
               <ListItem key={user._id} alignItems='flex-start' className='friend-list' onClick={() => handelFriendClick(user._id)}>
                 <ListItemAvatar>
-                  <Avatar alt={user.name} src={`http://localhost:8070/uploads/${user.image}`} sx={{ bgcolor: "#698562" }} />
+                  <Avatar alt={user.name} src={`https://talkease-fy2k.onrender.com/uploads/${user.image}`} sx={{ bgcolor: "#698562" }} />
                 </ListItemAvatar>
                 <ListItemText className='friend-name'>{user.name}   </ListItemText>
               </ListItem>
@@ -417,7 +417,7 @@ const Navbar = () => {
             return (
               <ListItem key={user._id} alignItems='flex-start' className='friend-list' >
                 <ListItemAvatar>
-                  <Avatar alt={user.name} src={`http://localhost:8070/uploads/${user.image}`} sx={{ bgcolor: "#698562" }} />
+                  <Avatar alt={user.name} src={`https://talkease-fy2k.onrender.com/uploads/${user.image}`} sx={{ bgcolor: "#698562" }} />
                 </ListItemAvatar>
                 <ListItemText className='friend-name'>{user.name}  <Checkbox color='success' sx={{ marginLeft: "auto" }}
                   onChange={() => handelCheckBoxChange(user._id)} /> </ListItemText>
@@ -463,7 +463,7 @@ const Navbar = () => {
             </>
           ) : (
             <>
-              <Avatar alt={user.data.name} src={`http://localhost:8070/uploads/${user.data.image}`} className='profile-avatar' sx={{ fontSize: "3rem" }} />
+              <Avatar alt={user.data.name} src={`https://talkease-fy2k.onrender.com/uploads/${user.data.image}`} className='profile-avatar' sx={{ fontSize: "3rem" }} />
               <div className="profile-details">
                 <p>User Name: {user.data.name}</p>
                 <p>User Email: {user.data.email}</p>
@@ -507,7 +507,7 @@ const Navbar = () => {
           </IconButton>
           <Tooltip title="Profile">
             {user.isLoading ? (<Skeleton variant='circular' width={40} height={40} />) :
-              (<Avatar alt={user.data.name} src={`http://localhost:8070/uploads/${user.data.image}`} sx={{ bgcolor: "#698562", cursor: "pointer" }} onClick={handelProfileOpen} />)}
+              (<Avatar alt={user.data.name} src={`https://talkease-fy2k.onrender.com/uploads/${user.data.image}`} sx={{ bgcolor: "#698562", cursor: "pointer" }} onClick={handelProfileOpen} />)}
 
           </Tooltip>
         </div>
@@ -534,7 +534,7 @@ const Navbar = () => {
           </IconButton>
           <Tooltip title="Profile">
             {user.isLoading ? (<Skeleton variant='circular' width={40} height={40} />) :
-              (<Avatar alt={user.data.name} src={`http://localhost:8070/uploads/${user.data.image}`} sx={{ bgcolor: "#698562", cursor: "pointer" }} onClick={handelProfileOpen} />)}
+              (<Avatar alt={user.data.name} src={`https://talkease-fy2k.onrender.com/uploads/${user.data.image}`} sx={{ bgcolor: "#698562", cursor: "pointer" }} onClick={handelProfileOpen} />)}
 
           </Tooltip>
         </div>

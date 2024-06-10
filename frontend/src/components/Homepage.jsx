@@ -107,7 +107,7 @@ const Homepage = () => {
   useEffect(() => {
 
     if (localStorage.getItem('authToken') && id) {
-      const socket = io('http://localhost:8070', {
+      const socket = io('https://talkease-fy2k.onrender.com', {
         query: {
           userId: id,
         },

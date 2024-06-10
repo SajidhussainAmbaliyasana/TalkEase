@@ -5,7 +5,7 @@ export const fetchFriend = createAsyncThunk('fetchFriend', async (_, { rejectWit
     try {
         const requestOptions = {
             method: "POST",
-            url: `http://localhost:8070/api/profile/user`,
+            url: `https://talkease-fy2k.onrender.com/api/profile/user`,
             headers: {
                 "Content-Type": "application/json",
                 "authToken": localStorage.getItem("authToken")

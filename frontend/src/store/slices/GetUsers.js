@@ -6,7 +6,7 @@ export const getUsers = createAsyncThunk('getUsers', async(_,{rejectWithValue})=
         
         const requestOptions = {
             method:"POST",
-            url:`http://localhost:8070/api/profile/getuser`,
+            url:`https://talkease-fy2k.onrender.com/api/profile/getuser`,
             headers: {
               "Content-Type": "application/json",
               "authToken":localStorage.getItem("authToken")

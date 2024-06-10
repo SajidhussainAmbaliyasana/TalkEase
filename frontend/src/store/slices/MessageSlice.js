@@ -7,7 +7,7 @@ export const getMessage = createAsyncThunk('getMessage',async(id,{rejectWithValu
         
         const requestOptions = {
             method:"GET",
-            url:`http://localhost:8070/api/message/${id}`,
+            url:`https://talkease-fy2k.onrender.com/api/message/${id}`,
             headers: {
               "Content-Type": "application/json",
               "authToken":localStorage.getItem("authToken")
@@ -32,7 +32,7 @@ export const sendMessage = createAsyncThunk('sendMessage', async(inputData,{reje
     try {
         const requestOptions = {
             method:"POST",
-            url:`http://localhost:8070/api/message/send/${inputData.id}`,
+            url:`https://talkease-fy2k.onrender.com/api/message/send/${inputData.id}`,
             headers: {
               "Content-Type": "application/json",
               "authToken":localStorage.getItem("authToken")
@@ -60,7 +60,7 @@ export const createChat = createAsyncThunk('createChat',async(id,{rejectWithValu
     try {
         const requestOptions = {
             method:"POST",
-            url:`http://localhost:8070/api/message/create/${id}`,
+            url:`https://talkease-fy2k.onrender.com/api/message/create/${id}`,
             headers: {
               "Content-Type": "application/json",
               "authToken":localStorage.getItem("authToken")

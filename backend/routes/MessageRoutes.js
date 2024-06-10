@@ -15,7 +15,7 @@ router.post('/send/:id', checkUser, async (req, res) => {
     const receiverID = req.params.id;
     const message = req.body.message;
 
-    if(!groupId || !receiverID){
+    if(!senderId || !receiverID){
       logger.error(`${req.url} the userid or the groupid is not fetched`);
       return res.status(404).json({"message":"Id are not found","success":false});
   }

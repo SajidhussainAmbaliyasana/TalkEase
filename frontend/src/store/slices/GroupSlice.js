@@ -8,7 +8,7 @@ export const fetchAllUsers = createAsyncThunk('fetchAllUsers', async (_, { rejec
 
         const requestOptions = {
             method: "POST",
-            url: `http://localhost:8070/api/group/user`,
+            url: `https://talkease-fy2k.onrender.com/api/group/user`,
             headers: {
                 "Content-Type": "application/json",
                 "authToken": localStorage.getItem("authToken")
@@ -34,7 +34,7 @@ export const createGroup = createAsyncThunk('createGroup', async (inputData, { r
 
         const requestOptions = {
             method: "POST",
-            url: `http://localhost:8070/api/group/create`,
+            url: `https://talkease-fy2k.onrender.com/api/group/create`,
             headers: {
                 "Content-Type": "application/json",
                 "authToken": localStorage.getItem("authToken")
@@ -60,7 +60,7 @@ export const fetchGroups = createAsyncThunk('fetchGroups',async()=>{
         
         const requestOptions = {
             method: "POST",
-            url: `http://localhost:8070/api/group/find`,
+            url: `https://talkease-fy2k.onrender.com/api/group/find`,
             headers: {
                 "Content-Type": "application/json",
                 "authToken": localStorage.getItem("authToken")
@@ -85,7 +85,7 @@ export const fetchGroupChats = createAsyncThunk('fetchGroupChats',async(id,{reje
         
         const requestOptions = {
             method: "POST",
-            url: `http://localhost:8070/api/group/chats/${id}`,
+            url: `https://talkease-fy2k.onrender.com/api/group/chats/${id}`,
             headers: {
                 "Content-Type": "application/json",
                 "authToken": localStorage.getItem("authToken")
@@ -111,7 +111,7 @@ export const sendGroupMessage = createAsyncThunk('sendGroupMessage',async(inputD
         
         const requestOptions = {
             method: "POST",
-            url: `http://localhost:8070/api/group/send/${inputData.id}`,
+            url: `https://talkease-fy2k.onrender.com/api/group/send/${inputData.id}`,
             headers: {
                 "Content-Type": "application/json",
                 "authToken": localStorage.getItem("authToken")
@@ -136,7 +136,7 @@ export const deleteGroup = createAsyncThunk('deleteGroup',async(id,{rejectWithVa
         
         const requestOptions = {
             method: "DELETE",
-            url: `http://localhost:8070/api/group/delete/${id}`,
+            url: `https://talkease-fy2k.onrender.com/api/group/delete/${id}`,
             headers: {
                 "Content-Type": "application/json",
                 "authToken": localStorage.getItem("authToken")
@@ -160,7 +160,7 @@ export const removeMembers = createAsyncThunk('removeMembers',async(inputData,{r
         
         const requestOptions = {
             method: "PATCH",
-            url: `http://localhost:8070/api/group/remove/${inputData.id}`,
+            url: `https://talkease-fy2k.onrender.com/api/group/remove/${inputData.id}`,
             headers: {
                 "Content-Type": "application/json",
                 "authToken": localStorage.getItem("authToken")
@@ -184,7 +184,7 @@ export const leaveGroup = createAsyncThunk('leaveGroup',async(id,{rejectWithValu
         
         const requestOptions = {
             method: "PATCH",
-            url: `http://localhost:8070/api/group/leave/${id}`,
+            url: `https://talkease-fy2k.onrender.com/api/group/leave/${id}`,
             headers: {
                 "Content-Type": "application/json",
                 "authToken": localStorage.getItem("authToken")
@@ -207,7 +207,7 @@ export const fetchMembers = createAsyncThunk('fetchMembers',async(id,{rejectWith
         
         const requestOptions = {
             method: "POST",
-            url: `http://localhost:8070/api/group/fetch/${id}`,
+            url: `https://talkease-fy2k.onrender.com/api/group/fetch/${id}`,
             headers: {
                 "Content-Type": "application/json",
                 "authToken": localStorage.getItem("authToken")
@@ -230,7 +230,7 @@ export const addMembers = createAsyncThunk("addMembers",async(inputData,{rejectW
         
         const requestOptions = {
             method: "PATCH",
-            url: `http://localhost:8070/api/group/addmember/${inputData.id}`,
+            url: `https://talkease-fy2k.onrender.com/api/group/addmember/${inputData.id}`,
             headers: {
                 "Content-Type": "application/json",
                 "authToken": localStorage.getItem("authToken")

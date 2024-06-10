@@ -5,7 +5,7 @@ export const userLogin = createAsyncThunk('userLogin',async(data,{rejectWithValu
     try {
         const requestOptions = {
             method:"POST",
-            url:`http://localhost:8070/api/user/login`,
+            url:`https://talkease-fy2k.onrender.com/api/user/login`,
             headers: {
               "Content-Type": "application/json",
             },
@@ -29,7 +29,7 @@ export const userSignUp = createAsyncThunk('userSignUp',async(data,{rejectWithVa
         
         const requestOptions = {
             method:"POST",
-            url:`http://localhost:8070/api/user/create`,
+            url:`https://talkease-fy2k.onrender.com/api/user/create`,
             headers: {
               "Content-Type": "application/json",
             },
@@ -55,7 +55,7 @@ export const fetchUser = createAsyncThunk('fetchUser',async(_,{rejectWithValue})
         
         const requestOptions = {
             method:"POST",
-            url:`http://localhost:8070/api/user/fetch`,
+            url:`https://talkease-fy2k.onrender.com/api/user/fetch`,
             headers: {
               "Content-Type": "application/json",
               "authToken":localStorage.getItem("authToken")
@@ -81,7 +81,7 @@ export const updateUser = createAsyncThunk('updateUser',async(inputData,{rejectW
         
         const requestOptions = {
             method:"PATCH",
-            url:`http://localhost:8070/api/profile/update`,
+            url:`https://talkease-fy2k.onrender.com/api/profile/update`,
             headers: {
               "authToken":localStorage.getItem("authToken")
             },
