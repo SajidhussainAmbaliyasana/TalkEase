@@ -8,7 +8,7 @@ const fs = require('fs/promises');
 const file = require('fs');
 const path = require('path');
 const checkUser = require('../middleware/CheckUser');
-
+const logger = require('../log/logger');
 
 
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -46,6 +46,7 @@ router.post('/create',async(req,res)=>{
         const checkExistance = await User.findOne({"email":getData.email});
 
         if(checkExistance){
+            logger.error('${req.url} User already present')
             return res.status(400).json({"message":"User Already Present","success":false});
         }
 
@@ -64,6 +65,7 @@ router.post('/create',async(req,res)=>{
         const savedData = await enterData.save();
 
         if(!savedData){
+            logger.error(`${req.url} not saved`)
             return res.status(400).json({"message":"Some Error Occured","success":false});
         }
 
@@ -79,7 +81,7 @@ router.post('/create',async(req,res)=>{
         return res.status(200).json({"authToken":authToken,"success":true});
         
     } catch (error) {
-        console.log(error);
+        logger.error(`${req.url} ERROR:${error}`)
         return res.status(500).json({"message":"Internal Server Error","success":false});
     }
 })
@@ -99,6 +101,7 @@ router.post('/login',async(req,res)=>{
         const findUser = await User.findOne({"email":getData.email});
 
         if(!findUser){
+            logger.error(`${req.url} user not found`)
             return res.status(404).json({"message":"Authnticate Using Valid Id and Password","success":false});
         }
 
@@ -106,6 +109,7 @@ router.post('/login',async(req,res)=>{
         const comparePassowrd = await bcrypt.compare(getData.password,findUser.password);
 
         if(!comparePassowrd){
+            logger.error(`${req.url} wrong password`)
             return res.status(404).json({"message":"Authnticate Using Valid Id and Password","success":false});
         }
 
@@ -121,7 +125,7 @@ router.post('/login',async(req,res)=>{
 
         return res.status(200).json({"authToken":authToken,"success":true});
     } catch (error) {
-        console.log(error);
+        logger.error(`${req.url} ERROR:${error}`)
         return res.status(500).json({"message":"Internal Server Error","success":false});
     }
 })
@@ -136,12 +140,13 @@ router.post('/fetch',checkUser,async(req,res)=>{
         const findUser = await User.findById(id).select('-password');
 
         if(!findUser){
+            logger.error(`${req.url} User not Found`)
             return res.status(404).json({"message":"User not Found","success":false});
         }
 
         return res.status(200).json({"data":findUser,"success":true});
     } catch (error) {
-        console.log(error)
+        logger.error(`${req.url} ERROR:${error}`)
         return res.status(500).json({"message":"Internal Server Error","success":false});
     }
 })
@@ -160,12 +165,13 @@ router.get('/find',checkUser,async(req,res)=>{
 
 
         if(!findUSers){
+            logger.error(`${req.url} User not found`)
             return res.status(500).json({"message":"Some Error Occured","success":false})
         }
 
         return res.status(200).json({"data":findUSers,"success":true})
     } catch (error) {
-        console.log(error)
+        logger.error(`${req.url} ERROR:${error}`)
         return res.status(500).json({"message":"Internal Server Error","success":false});
     }
 })

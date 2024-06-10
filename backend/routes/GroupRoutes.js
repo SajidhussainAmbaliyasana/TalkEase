@@ -5,7 +5,7 @@ const Group = require('../model/GroupModel')
 const User = require('../model/UserModel');
 const GroupMessage = require('../model/GroupMessage')
 const {getGroupMembersID,getIo} = require('../socket')
-
+const logger = require('../log/logger');
 
 
 router.post('/create', checkUser, async (req, res) => {
@@ -25,6 +25,7 @@ router.post('/create', checkUser, async (req, res) => {
 
         //if less than 3 members dont allow to create group
         if (!getData.members.length > 2) {
+            logger.info(`${req.url} less member selected`);
             return res.status(500).json({ "message": "Minimum Three User Required To Create A Group", "success": false })
         }
 
@@ -33,6 +34,7 @@ router.post('/create', checkUser, async (req, res) => {
         const saveGroup = await createGroup.save();
 
         if (!saveGroup) {
+            logger.error(`${req.url} Group Not Saved}`)
             return res.status(500).json({ "message": "Some Error Occured", "success": true });
         }
 
@@ -56,11 +58,12 @@ router.post('/create', checkUser, async (req, res) => {
         }
         // console.log(socketIds);
 
+        
         return res.status(200).json({ "data": saveGroup, "success": true });
 
 
     } catch (error) {
-        console.log(`from /create ${error}`)
+        logger.error(`${req.url} ERROR: ${error}`)
         return res.status(500).json({ "message": "Internal Server Error", "success": false });
     }
 })
@@ -73,6 +76,7 @@ router.post('/user', checkUser, async (req, res) => {
         const userId = req.user.id;
         
         if(!userId){
+            logger.error(`${req.url} the user id not fetched from request`)
             return res.status(404).json({"message":'Id Not Found',"success":false});
         }
 
@@ -80,12 +84,14 @@ router.post('/user', checkUser, async (req, res) => {
         const findUser = await User.find({"_id":{"$ne":userId}},'-password -createdAt -updatedAt -__v')
 
         if(!findUser){
+            logger.warn(`${req.url} the users are not fethched`)
             return res.status(500).json({"message":"Some Error Occured","success":false})
         }
         
+       
         return res.status(200).json({"data":findUser,"success":true});
     } catch (error) {
-        console.log(`from /user ${error}`);
+        logger.error(`${req.url} ERROR:${error}`)
         return res.status(500).json({"message":"Internal Server Error","success":false});
     }
 })
@@ -104,13 +110,14 @@ router.post('/find',checkUser,async(req,res)=>{
 
         //console.log(findGroup);
         if(!findGroup){
+            logger.error(`${req.url} the groups are not found`)
             return res.status(500).json({"message":"Cannot Fetch Groups","success":false});
         }
 
         return res.status(200).json({"data":findGroup,"success":true})
 
     } catch (error) {
-        console.log(`from /find ${error}`);
+        logger.error(`${req.url} ERROR:${error}`)
         return res.status(500).json({"message":"Internal Server Error","success":false});
     }
 });
@@ -122,20 +129,28 @@ router.post('/chats/:id',checkUser,async(req,res)=>{
         const groupId = req.params.id;
         const userId = req.user.id;
 
+        if(!groupId || !userId){
+            logger.error(`${req.url} the userid or the groupid is not fetched`);
+            return res.status(404).json({"message":"Id are not found","success":false});
+        }
+
         //fetch all the chats and populate the chats and members and remove the paramter of members which are not requried
-        const fetGroupChats = await Group.findById(groupId).populate("messages").populate({
+        const fetGroupChats = await Group.findById(groupId).populate({
+            path:"messages",
+            select:"-groupId -updatedAt -__v"
+        }).populate({
             path:"members",
             select:"-password -createdAt -updatedAt -email -__v"
         });
 
         if(!fetGroupChats){
+            logger.error(`${req.url} the groupchats are not fetched`)
             return res.status(404).json({"message":"Group Not Found","success":false});
         }
 
         return res.status(200).json({"data":fetGroupChats,"success":true,"userId":userId})
     } catch (error) {
-        console.log(error);
-        console.log(`from /chats ${error}`);
+        logger.error(`${req.url} ERROR:${error}`)
         return res.status(500).json({"message":"Internal Server Error","success":false});
     }
 })
@@ -147,10 +162,16 @@ router.post('/send/:id',checkUser,async(req,res)=>{
         const groupId = req.params.id;
         const userId = req.user.id;
 
+        if(!groupId || !userId){
+            logger.error(`${req.url} the userid or the groupid is not fetched`);
+            return res.status(404).json({"message":"Id are not found","success":false});
+        }
+
         // get the user id and group id and fetch the group
         let fetchGroup = await Group.findById(groupId);
 
         if(!fetchGroup){
+            logger.error(`${req.url} group are not fetched`)
             return res.status(404).json({"message":"Group Not Found","success":false});
         }        
 
@@ -173,12 +194,14 @@ router.post('/send/:id',checkUser,async(req,res)=>{
         const messageData={
             senderId:userId,
             groupId:groupId,
-            message:req.body.message
+            message:req.body.message,
+            senderName:req.body.senderName
         }
 
         const createMessage = new GroupMessage(messageData);
 
         if(!createMessage){
+            logger.error(`${req.url} message not created`)
             return res.status(500).json({"message":"Message Not Created","success":false});
         }
 
@@ -190,6 +213,7 @@ router.post('/send/:id',checkUser,async(req,res)=>{
         const saveData = await Promise.all([createMessage.save(),fetchGroup.save()]);
 
         if(!saveData){
+            logger.error(`${req.url} data not saved`);
             return res.status(500).json({"message":"Message Not Saved","success":false});
         }
 
@@ -212,7 +236,7 @@ router.post('/send/:id',checkUser,async(req,res)=>{
         
 
     } catch (error) {
-        console.log(`from /send ${error}`);
+        logger.error(`${req.url} ERROR:${error}`);
         return res.status(500).json({"message":"Internal Server Error","success":false});
     }
 })
@@ -225,12 +249,17 @@ router.patch('/remove/:id',checkUser,async(req,res)=>{
         const groupId = req.params.id;
         const idOfRemoveUser = req.body.members;
 
+        if(!groupId || !idOfRemoveUser){
+            logger.error(`${req.url} the userid or the groupid is not fetched`);
+            return res.status(404).json({"message":"Id are not found","success":false});
+        }
 
         //find the group
         let findGroup = await Group.findById(groupId);
 
 
         if(!findGroup){
+            logger.error(`${req.url} group not found`)
             return res.status(404).json({"message":"Group Not Found","success":false});
         }
 
@@ -243,6 +272,7 @@ router.patch('/remove/:id',checkUser,async(req,res)=>{
         const updateGroup = await Group.findByIdAndUpdate(groupId,{"members":updatedMembers},{new:true});
 
         if(!updateGroup){
+            logger.error(`${req.url} group not updated`)
             return res.status(500).json({"message":"Group Not Updated","success":false});
         }
 
@@ -255,7 +285,7 @@ router.patch('/remove/:id',checkUser,async(req,res)=>{
         
         return res.status(200).json({"data":idOfRemoveUser,"success":true});
     } catch (error) {
-        console.log(`from /remove ${error}`);
+        logger.error(`${req.url} ERROR:${error}`);
         return res.status(500).json({"message":"Internal Sever Error","success":false});
     }
 })
@@ -268,14 +298,16 @@ router.delete('/delete/:id',checkUser,async(req,res)=>{
         const groupId = req.params.id;
         const loggedinUser = req.user.id;
 
-        if(groupId === ""){
-            return res.status(404).json({"message":"Group Id Not Found","success":false});
+        if(!groupId || !loggedinUser){
+            logger.error(`${req.url} the userid or the groupid is not fetched`);
+            return res.status(404).json({"message":"Id are not found","success":false});
         }
 
-
+       
         const findGroup = await Group.findById(groupId).select("-groupName -groupAdmin -image -createdAt -updatedAt -__v");
 
         if(!findGroup){
+            logger.error(`${req.url} Group Not Found`)
             return res.status(404).json({"message":"Group Not Found","success":false})
         }
 
@@ -291,6 +323,7 @@ router.delete('/delete/:id',checkUser,async(req,res)=>{
         ])
 
         if(!deleteMessages && !deleteGroup){
+            logger.error(`${req.url} Not Deleted`)
             return res.status(500).json({"message":"Some Error Occured","success":false});
         }   
 
@@ -318,7 +351,7 @@ router.delete('/delete/:id',checkUser,async(req,res)=>{
         return res.status(200).json({"success":true,"groupId":groupId});
 
     } catch (error) {
-        console.log(`from /delete ${error}`);
+        logger.error(`${req.url} ERROR:${error}`)
         return res.status(500).json({"message":"Internal Server Error","success":false});
     }
 })
@@ -328,33 +361,42 @@ router.delete('/delete/:id',checkUser,async(req,res)=>{
 router.patch('/leave/:id',checkUser,async(req,res)=>{
     try {
         
+        //get the userid and groupid from body
         const userId = req.user.id;
         const groupId = req.params.id;
 
-        if(!userId || !groupId){
-            return res.status(404).json({"message":"Id Not Found","success":false});
+        if(!groupId || !userId){
+            logger.error(`${req.url} the userid or the groupid is not fetched`);
+            return res.status(404).json({"message":"Id are not found","success":false});
         }
 
+
+        //find the group
         const findGroup = await Group.findById(groupId);
 
         if(!findGroup){
+            logger.error(`${req.url} group not found`)
             return res.status(404).json({"message":"Group Not Found","success":false});
         }
 
+        // get the mmebers of the group
         const groupMembers = findGroup.members;
 
+        //convert the id of the members of the group into string
         const groupMembersId = groupMembers.map((user)=>{
             return user._id.toString();
         })
 
-        
+        //remove the user who want to leave
         const newMembers = groupMembersId.filter((user)=>{
             return user !== userId
         })
         
+        //update the group members array
         const updateGroup = await Group.findByIdAndUpdate(groupId,{"members":newMembers});
 
         if(!updateGroup){
+            logger.error(`${req.url} group not updated`)
             return res.status(500).json({"message":"Group Not Updated","success":false});
         }
 
@@ -369,7 +411,7 @@ router.patch('/leave/:id',checkUser,async(req,res)=>{
 
         return res.status(200).json({"data":userId,"groupId":groupId,"success":true});
     } catch (error) {
-        console.log(`from /leave ${error}`);
+        logger.error(`${req.url} ERROR:${error}`)
         return res.status(500).json({"message":"Internal Server Error","success":false});
     }
 })
@@ -378,24 +420,31 @@ router.patch('/leave/:id',checkUser,async(req,res)=>{
 router.post('/fetch/:id',checkUser,async(req,res)=>{
     try {
         
+        //get the groupid
         const groupId = req.params.id;
 
         if(!groupId){
+            logger.error(`${req.url} group id not found`)
             return res.status(404).json({"message":"Group Id Not Found","success":false});
         }
 
+        //find all the users
         let allUsers = await User.find({}).select("-password -createdAt -updatedAt -__v");
 
         if(!allUsers){
+            logger.error(`${req.url} users not fetched`)
             return res.status(404).json({"message":"User Not Fetched","success":false});
         }
         
+        //find the group members
         let groupMembers = await Group.findById(groupId).select("members");
 
         if(!groupMembers){
+            logger.error(`${req.url} group not found`)
             return res.status(404).json({"message":"Group Not Found","success":false});
         }
 
+        //from all user reomve the group members it would now contain only that users who are not the part of the group
         const filterUSers = allUsers.filter((user)=>{
             return !groupMembers.members.includes(user._id)
         })
@@ -404,7 +453,7 @@ router.post('/fetch/:id',checkUser,async(req,res)=>{
         
 
     } catch (error) {
-        console.log(`from /fetch ${error}`);
+        logger.error(`${req.url} ERROR:${error}`)
         return res.status(500).json({"message":"Internal Server Error","success":false});
     }
 })
@@ -412,40 +461,52 @@ router.post('/fetch/:id',checkUser,async(req,res)=>{
 router.patch('/addmember/:id',checkUser,async(req,res)=>{
     try {
         
+        // get the groupid the newmembers and the user id 
         const groupId = req.params.id;
         const newMembersData = req.body.members;
         const userId = req.user.id
 
+        if(!groupId || !userId){
+            logger.error(`${req.url} the userid or the groupid is not fetched`);
+            return res.status(404).json({"message":"Id are not found","success":false});
+        }
+
+        //fetch all members whose id is provided 
         const members = await User.find({"_id":{"$in":newMembersData}}).select("_id name image");
        
-
+        //conver that id into string for socket purpose
         const memberIdString = members.map((user)=>{
             return user._id.toString();
         })
 
-       
+       //find the group and get the members and the group id only
         const findGroup = await Group.findById(groupId).select("members");
 
-        
+        //get the id of the exixting members for socket purpose
         const oldMembersIdString = findGroup.members.map((user)=>{
             return user.toString();
         })
 
-        
-
+        //merge the data of the user fetched into the members of existing group
         const newMembers = findGroup.members.concat(newMembersData);
 
+        //update the group
         const updateMembers = await Group.findByIdAndUpdate(groupId,{"members":newMembers});
 
         if(!updateMembers){
+            logger.error(`${req.url} members not updated`)
             return res.status(500).json({"message":"Not Updated","success":false})
         }
 
+        //merge the string id to get the socket ids
         const mergeIds = memberIdString.concat(oldMembersIdString);
+
+        //remove the id of the loggedin user
         const filteredId = mergeIds.filter((user)=>{
             return user !== userId
         })
 
+        //socket part
         const getSocketIds = getGroupMembersID(filteredId);
         const io = getIo();
 
@@ -459,7 +520,7 @@ router.patch('/addmember/:id',checkUser,async(req,res)=>{
         return res.status(200).json({"data":members,"success":true});
 
     } catch (error) {
-        console.log(`from '/addmember ${error}`);
+        logger.error(`${req.url} ERROR:${error}`)
         return res.status(500).json({"message":"Internal Server Error","success":false});
     }
 })

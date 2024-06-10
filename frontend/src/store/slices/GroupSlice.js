@@ -116,7 +116,7 @@ export const sendGroupMessage = createAsyncThunk('sendGroupMessage',async(inputD
                 "Content-Type": "application/json",
                 "authToken": localStorage.getItem("authToken")
             },
-            data:{message:inputData.message}
+            data:{message:inputData.message,senderName:inputData.senderName}
         }
 
         const response = await axios(requestOptions);

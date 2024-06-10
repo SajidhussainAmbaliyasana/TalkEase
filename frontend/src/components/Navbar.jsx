@@ -10,7 +10,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { setAlert } from '../store/slices/AlertSlice';
-import { removeUser } from '../store/slices/UserSlice';
+import { removeUser, updateUser } from '../store/slices/UserSlice';
 import { clearMessage } from '../store/slices/MessageSlice';
 import { fetchFriend } from '../store/slices/FriendSlice';
 import { createChat } from '../store/slices/MessageSlice';
@@ -25,14 +25,18 @@ const Navbar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  
+
   const [friendDialog, setFriendDialog] = useState(false);
   const [groupDialog, setGroupDialog] = useState(false);
   const [groupName, setGroupName] = useState("");
   const [members, setMembers] = useState([]);
   const [profileDialog, setProfileDialog] = useState(false);
+  const [edit, setEdit] = useState(false);
+  const [input, setInput] = useState({ name: "", email: "" });
+  const [image, setImage] = useState("");
+  const [editBtn, setEditBtn] = useState(false);
 
-  const user = useSelector((state) => {return state.user});
+  const user = useSelector((state) => { return state.user });
   const friend = useSelector((state) => { return state.friend })
   const group = useSelector((state) => { return state.group })
 
@@ -228,8 +232,105 @@ const Navbar = () => {
 
   const handelProfileClose = () => {
     setProfileDialog(false);
+    setEdit(false);
   }
 
+  const editOpen = () => {
+    setInput({ name: user.data.name, email: user.data.email })
+    setEdit(!edit)
+
+  }
+
+  const handelInputchange = (event) => {
+    setInput({ ...input, [event.target.name]: event.target.value });
+  }
+
+  const handelImageChange = (event) => {
+    setImage(event.target.files[0]);
+  }
+
+
+  //todo complete this function
+  const handelEditSubmit = async () => {
+    try {
+      setEditBtn(true);
+      if(image){
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+
+        if(allowedTypes.includes(image.type)){
+          if (image.size >= 1.5 * 1024 * 1024) {
+            const alertMessage ={
+              message:"Image Not Accepted Bigger Than 1.5 MB",
+              type:"error"
+            }
+            dispatch(setAlert(alertMessage));
+            setImage("");
+            setEditBtn(false);
+            return;
+        }
+
+        }else{
+          const alertMessage = {
+            message:"Only jpg ,jpeg and png are Accepted",
+            type:"error"
+          }
+          dispatch(setAlert(alertMessage));
+          setImage("");
+          setEditBtn(false);
+          return;
+        }
+      }
+      if (input.email === "" || input.name === "") {
+        const alertMessage = {
+          message: "Fill All The Required Fileds",
+          type: "error"
+        }
+        dispatch(setAlert(alertMessage));
+        setImage("");
+        setEditBtn(false);
+        return;
+      }
+
+      
+      const formData = new FormData();
+      formData.append('name', input.name);
+      formData.append('email', input.email);
+      if (image) {
+        formData.append('image', image);
+      }
+
+
+      const response = await dispatch(updateUser(formData));
+      if (!response.payload.success) {
+        const alertMessage = {
+          message: response.payload.message,
+          type: "error"
+        }
+        dispatch(setAlert(alertMessage));
+        setEditBtn(false);
+        setEdit(false);
+        setInput({ name: "", email: "" });
+        setImage("")
+        return;
+      }else{
+        const alertMessage ={
+          message:"User Updated",
+          type:"success"
+        }
+        dispatch(setAlert(alertMessage));
+      }
+    } catch (error) {
+      console.error(error);
+      setEditBtn(false);
+      setEdit(false);
+      setInput({ name: "", email: "" });
+      setImage("")
+    }
+    setEditBtn(false);
+    setEdit(false);
+    setInput({ name: "", email: "" });
+    setImage("")
+  }
 
 
   return (
@@ -268,7 +369,7 @@ const Navbar = () => {
 
               <ListItem key={user._id} alignItems='flex-start' className='friend-list' onClick={() => handelFriendClick(user._id)}>
                 <ListItemAvatar>
-                  <Avatar alt={user.name} src="/ss" sx={{ bgcolor: "#698562" }} />
+                  <Avatar alt={user.name} src={`http://localhost:8070/uploads/${user.image}`} sx={{ bgcolor: "#698562" }} />
                 </ListItemAvatar>
                 <ListItemText className='friend-name'>{user.name}   </ListItemText>
               </ListItem>
@@ -316,7 +417,7 @@ const Navbar = () => {
             return (
               <ListItem key={user._id} alignItems='flex-start' className='friend-list' >
                 <ListItemAvatar>
-                  <Avatar alt={user.name} src="/ss" sx={{ bgcolor: "#698562" }} />
+                  <Avatar alt={user.name} src={`http://localhost:8070/uploads/${user.image}`} sx={{ bgcolor: "#698562" }} />
                 </ListItemAvatar>
                 <ListItemText className='friend-name'>{user.name}  <Checkbox color='success' sx={{ marginLeft: "auto" }}
                   onChange={() => handelCheckBoxChange(user._id)} /> </ListItemText>
@@ -347,19 +448,39 @@ const Navbar = () => {
         }}
           onClick={handelProfileClose}
         >
-          <CloseIcon fontSize='large'/>
+          <CloseIcon fontSize='large' />
         </IconButton>
 
         <DialogContent dividers className='profile-dialog'>
-          <Avatar alt={user.data.name} src='/ss' className='profile-avatar' sx={{fontSize:"3rem"}}/>
-            <div className="profile-details">
-              <p>User Name: {user.data.name}</p>
-              <p>User Email: {user.data.email}</p>
-            </div>
-            
+          {edit ? (
+            <>
+              <div className="profile-form">
+                <TextField name='name' variant='outlined' label="User Name" placeholder='Enter User Name' sx={{ width: "50%", marginBottom: "1rem" }} color='success' value={input.name} onChange={handelInputchange} required />
+                <TextField name='email' variant='outlined' label="User Email" placeholder='Enter User Email' sx={{ width: "50%", marginBottom: "1rem" }} color='success' value={input.email} onChange={handelInputchange} required />
+                <TextField type='file' variant='outlined' color='success' sx={{ width: "50%" }} onChange={handelImageChange} />
+              </div>
+
+            </>
+          ) : (
+            <>
+              <Avatar alt={user.data.name} src={`http://localhost:8070/uploads/${user.data.image}`} className='profile-avatar' sx={{ fontSize: "3rem" }} />
+              <div className="profile-details">
+                <p>User Name: {user.data.name}</p>
+                <p>User Email: {user.data.email}</p>
+              </div>
+            </>
+          )}
+
+
         </DialogContent>
         <DialogActions>
-          <Button variant='outlined' color='success' sx={{fontSize:"1.1rem"}}>Edit</Button>
+          {edit ? (
+            <Button variant='outlined' color='success' sx={{ fontSize: "1.1rem" }} onClick={handelEditSubmit} disabled={editBtn}>
+              {editBtn? (<CircularProgress color='success'/>):"Save Changes"}</Button>
+          ) : (
+            <Button variant='outlined' color='success' sx={{ fontSize: "1.1rem" }} onClick={editOpen}>Edit</Button>
+          )}
+
         </DialogActions>
 
 
@@ -380,17 +501,17 @@ const Navbar = () => {
               <PeopleOutlineRoundedIcon />
             </IconButton>
           </Tooltip>
-          <Tooltip title="Notification">
+          {/* <Tooltip title="Notification">
             <IconButton>
               <NotificationsActiveRoundedIcon />
             </IconButton>
-          </Tooltip>
+          </Tooltip> */}
           <IconButton onClick={handelLogout}>
             <LogoutRoundedIcon />
           </IconButton>
           <Tooltip title="Profile">
             {user.isLoading ? (<Skeleton variant='circular' width={40} height={40} />) :
-              (<Avatar alt={user.data.name} src="/stg" sx={{ bgcolor: "#698562", cursor: "pointer" }} onClick={handelProfileOpen} />)}
+              (<Avatar alt={user.data.name} src={`http://localhost:8070/uploads/${user.data.image}`} sx={{ bgcolor: "#698562", cursor: "pointer" }} onClick={handelProfileOpen} />)}
 
           </Tooltip>
         </div>

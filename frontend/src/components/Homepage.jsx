@@ -227,7 +227,7 @@ const Homepage = () => {
                 <div className="user-list">
                   {friend && friend.data && friend.data.data &&
                     friend.data.data.filter((friend) => friend.name.toLowerCase().includes(search.toLocaleLowerCase())).map((friend) => (
-                      <Users key={friend._id} name={friend.name} id={friend._id} />
+                      <Users key={friend._id} name={friend.name} id={friend._id} image={friend.image}/>
                     ))
                   }
                 </div>

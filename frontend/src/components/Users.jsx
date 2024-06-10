@@ -81,7 +81,7 @@ const Users = (props) => {
                         variant="dot"
                     >
                         <Avatar alt={props.name} src="/ss" sx={{ bgcolor: "#698562" }}/>
-                    </StyledBadge>):(<Avatar alt={props.name} src='/ss' sx={{ bgcolor: "#698562" }}/>)}
+                    </StyledBadge>):(<Avatar alt={props.name} src={`http://localhost:8070/uploads/${props.image}`} sx={{ bgcolor: "#698562" }}/>)}
                 </ListItemAvatar>
                 <ListItemText className='friend'>
                     <p>{props.name}</p>

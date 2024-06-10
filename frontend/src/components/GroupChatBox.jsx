@@ -59,7 +59,8 @@ const GroupChatBox = ({ socket }) => {
 
       const enterData = {
         id: group.data._id,
-        message: message
+        message: message,
+        senderName:user.data.name
       }
 
       const response = await dispatch(sendGroupMessage(enterData));
@@ -377,7 +378,7 @@ const GroupChatBox = ({ socket }) => {
           {group.data && group.data.members && group.data.members.map((member) => {
             return <ListItem key={member._id} alignItems='flex-start' className='friend-list'>
               <ListItemAvatar>
-                <Avatar alt={member.name} src="/ss" sx={{ bgcolor: "#698562" }} />
+                <Avatar alt={member.name} src={`http://localhost:8070/uploads/${member.image}`} sx={{ bgcolor: "#698562" }} />
               </ListItemAvatar>
               <ListItemText className='friend-name'>
                 {member.name} <p style={{ marginLeft: "3rem", color: "#536c4d" }}>{group.data.groupAdmin === member._id ? "Group Admin" : undefined}</p>
@@ -485,7 +486,7 @@ const GroupChatBox = ({ socket }) => {
           {group.members && group.members.map((user)=>{
             return <ListItem key={user._id} alignItems='flex-start' className='friend-list'>
               <ListItemAvatar>
-                <Avatar alt={user.name} src="/ss" sx={{ bgcolor: "#698562" }} />
+                <Avatar alt={user.name} src={`http://localhost:8070/uploads/${user.image}`} sx={{ bgcolor: "#698562" }} />
               </ListItemAvatar>
               <ListItemText className='friend-name'>
                 {user.name}
@@ -509,7 +510,7 @@ const GroupChatBox = ({ socket }) => {
         <div className="chat-box-head">
           <AvatarGroup max={4} total={group.data.members.length ? group.data.members.length : 3} className='chat-box-profile' >
             {group.data && group.data.members && group.data.members.map((user) => {
-              return <Avatar key={user._id} alt={user.name} src='/aa' sx={{ bgcolor: "#698562" }} />
+              return <Avatar key={user._id} alt={user.name} src={`http://localhost:8070/uploads/${user.image}`} sx={{ bgcolor: "#698562" }} />
             })}
           </AvatarGroup>
           <p>{group.data.groupName ? group.data.groupName : "Group"}</p>
@@ -518,7 +519,7 @@ const GroupChatBox = ({ socket }) => {
         <div className="chat-box-messages-outer">
           <div className="message">
             {group.data && group.data.messages && group.data.messages.map((message) => {
-              return <GroupMessage key={message._id} message={message.message} senderId={message.senderId} userId={group.userId} />
+              return <GroupMessage key={message._id} message={message.message} senderId={message.senderId} userId={group.userId} senderName={message.senderName} createdAt={message.createdAt}/>
             })}
             {/* <GroupMessage/> */}
           </div>

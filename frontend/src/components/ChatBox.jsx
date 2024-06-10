@@ -117,7 +117,7 @@ const ChatBox = ({socket}) => {
   return (
     <div className="chat-box">
       <div className="chat-box-head">
-        <Avatar alt={message.user.name ?message.user.name:"user"} src="/stg" className='chat-box-profile' sx={{ bgcolor: "#698562" }}/>
+        <Avatar alt={message.user.name ?message.user.name:"user"} src={`http://localhost:8070/uploads/${message.user.image}`} className='chat-box-profile' sx={{ bgcolor: "#698562" }}/>
         <p>{message.user.name ? message.user.name:"user" }</p>
       </div>
       <div className="chat-box-messages-outer">
@@ -125,7 +125,7 @@ const ChatBox = ({socket}) => {
          
           {message && message.data && message.data.map((message)=>{
             return <Message key={message._id} message={message.message} userId={user.data._id} senderId={message.senderId} 
-            receiverId={message.receiverId}/>
+            receiverId={message.receiverId} createdAt={message.createdAt}/>
           })} 
           
         </div>

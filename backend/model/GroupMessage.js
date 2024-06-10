@@ -6,6 +6,10 @@ const groupMessageModel = mongoose.Schema({
         ref:"User",
         required:true
     },
+    senderName:{
+        type:String,
+        default:""
+    },
     groupId:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"Group",

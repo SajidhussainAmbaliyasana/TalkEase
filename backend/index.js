@@ -5,6 +5,7 @@ const dotenv = require('dotenv');
 const cors = require('cors')
 require('./Database')
 const { setupSocket } = require('./socket');
+const morganMiddelware = require('./middleware/Morgan')
 
 
 
@@ -17,6 +18,7 @@ setupSocket(server);
 dotenv.config();
 app.use(express.json());
 app.use(cors());
+app.use(morganMiddelware);
 
 app.use('/uploads', express.static(__dirname + '/uploads'));
 

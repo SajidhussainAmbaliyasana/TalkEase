@@ -76,13 +76,36 @@ export const fetchUser = createAsyncThunk('fetchUser',async(_,{rejectWithValue})
 })
 
 
-
+export const updateUser = createAsyncThunk('updateUser',async(inputData,{rejectWithValue})=>{
+    try {
+        
+        const requestOptions = {
+            method:"PATCH",
+            url:`http://localhost:8070/api/profile/update`,
+            headers: {
+              "authToken":localStorage.getItem("authToken")
+            },
+            data:inputData
+            
+        }
+        
+        const response = await axios(requestOptions);
+        return response.data;
+    } catch (error) {
+        if(error.response){
+            throw rejectWithValue({message:error.response.data.message?error.response.data.message:"Error Occured"});
+        }else{
+            throw rejectWithValue({message:error.message?error.message:"Error Occured"})
+        }
+    }
+})
 
 
 const UserSlice = createSlice({
     name:"user",
     initialState:{
         data:{},
+        editLoading:false,
         isLoading:false,
         isError:false,
         errorMessage:""
@@ -150,6 +173,27 @@ const UserSlice = createSlice({
             state.errorMessage = action.payload.message;
             state.isLoading = false;
             state.data = {};
+        })
+
+
+        //update
+        builder.addCase(updateUser.pending,(state,action)=>{
+            state.editLoading = true;
+            state.isError = false;
+            state.errorMessage = "";
+        })
+
+        builder.addCase(updateUser.fulfilled,(state,action)=>{
+            state.isLoading = false;
+            state.data = action.payload.data;
+            state.isError = false;
+            state.errorMessage = ""
+        })
+
+        builder.addCase(updateUser.rejected,(state,action)=>{
+            state.isError = true;
+            state.errorMessage = action.payload.message;
+            state.isLoading = false;
         })
 
     }

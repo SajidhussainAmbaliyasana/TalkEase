@@ -345,6 +345,75 @@
     font-family: "Poetsen One", sans-serif;
 }
 
+.group-message-sender{
+    background: #d2ddcf;
+    color: #161e15;
+    width: fit-content;
+    max-width: 50%;
+    box-sizing: border-box;
+    word-wrap: break-word;
+    margin-left: auto;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    border-radius: 0.2rem;
+    border-right:0.2rem solid  #536c4d;
+    display: flex;
+    flex-direction: column;
+}
+
+.group-message-receiver{
+    background: #d2ddcf;
+    color: #161e15;
+    width: fit-content;
+    max-width: 50%;
+    box-sizing: border-box;
+    word-wrap: break-word;
+    margin-right: auto;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    border-radius: 0.2rem;
+    border-left:0.2rem solid  #536c4d;
+    display: flex;
+    flex-direction: column;
+}
+
+.group-receiver-name{
+    font-size: 0.8rem;
+    margin-right: auto;
+    font-family: "Poetsen One", sans-serif;
+    margin-bottom: 0.2rem;
+    color: #536C4D;
+}
+
+.group-sender-name{
+    font-size: 0.8rem;
+    margin-left: auto;
+    font-family: "Poetsen One", sans-serif;
+    margin-bottom: 0.2rem;
+    color: #536C4D;
+}
+
+.group-sender-time{
+    font-size: 0.7rem;
+    margin-right: auto;
+    font-family: "Poetsen One", sans-serif;
+    margin-top: 0.2rem;
+    color: #536C4D;
+}
+
+.group-receiver-time{
+    font-size: 0.7rem;
+    margin-left: auto;
+    font-family: "Poetsen One", sans-serif;
+    margin-top: 0.2rem;
+    color: #536C4D;
+}
+
+.group-message{
+    font-size: 1rem;
+    font-family: "Poetsen One", sans-serif;
+}
+
 .friend-message{
     background: #d2ddcf;
     color: #161e15;
@@ -469,19 +538,6 @@
     border-radius: 0.2rem;
 }
 
-/* .group-message{
-    background: #d2ddcf;
-    color: #161e15;
-    width: 50%;
-    max-width: fit-content;
-    padding: 0.1rem 0.5rem;
-    border-radius: 0.2rem;
-    font-size: 1.1rem;
-    border-right:0.2rem solid  #536c4d;
-    margin-left: auto;
-    margin-bottom: 0.5rem;
-    font-family: "Poetsen One", sans-serif;
-} */
 
 .profile-avatar{
     height: 6rem !important;
@@ -527,4 +583,13 @@
     font-size: 2rem;
     font-family: "Poetsen One", sans-serif;
     color: #536c4d;
+}
+
+.profile-form{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column !important;
+    
 }

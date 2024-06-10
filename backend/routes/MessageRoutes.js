@@ -5,6 +5,7 @@ const Chat = require('../model/ChatModel');
 const checkUser = require('../middleware/CheckUser');
 const User = require('../model/UserModel');
 const { getUserSocketId, getIo } = require('../socket');
+const logger = require('../log/logger');
 
 
 // This route is to send a message
@@ -13,6 +14,11 @@ router.post('/send/:id', checkUser, async (req, res) => {
     const senderId = req.user.id;
     const receiverID = req.params.id;
     const message = req.body.message;
+
+    if(!groupId || !receiverID){
+      logger.error(`${req.url} the userid or the groupid is not fetched`);
+      return res.status(404).json({"message":"Id are not found","success":false});
+  }
 
     let isNewChat = false;
 
@@ -36,6 +42,7 @@ router.post('/send/:id', checkUser, async (req, res) => {
     }
 
     if (!chat) {
+      logger.error(`${req.url} chat not created`)
       return res.status(500).json({ "message": "Chat Not Created", "success": false });
     }
 
@@ -76,7 +83,7 @@ router.post('/send/:id', checkUser, async (req, res) => {
 
     return res.status(200).json({ "data": newMessage, "success": true });
   } catch (error) {
-    console.error(`From /send ${error}`);
+    logger.error(`${req.url} ERROR:${error}`)
     return res.status(500).json({ "message": "Internal Server Error", "success": false });
   }
 });
@@ -86,6 +93,11 @@ router.get('/:id', checkUser, async (req, res) => {
   try {
     const userId = req.user.id;
     const anotherId = req.params.id;
+
+    if(!anotherId || !userId){
+      logger.error(`${req.url} the userid or the groupid is not fetched`);
+      return res.status(404).json({"message":"Id are not found","success":false});
+  }
 
     const conversation = await Chat.findOne({
       users: { "$all": [userId, anotherId] }
@@ -101,12 +113,13 @@ router.get('/:id', checkUser, async (req, res) => {
     const getUser = await User.findById(anotherId).select('-password');
 
     if (!getUser) {
+      logger.error(`${req.url} User Not Found`)
       return res.status(500).json({ "message": "User Not Found", "success": false });
     }
 
     return res.status(200).json({ "data": messages, "user": getUser, "success": true });
   } catch (error) {
-    console.error(`From / ${error}`);
+    logger.error(`${req.url} ERROR:${error}`);
     return res.status(500).json({ "message": "Internal Server Error", "success": false });
   }
 });
@@ -119,9 +132,15 @@ router.post('/create/:id', checkUser, async (req, res) => {
     const senderId = req.user.id;
     const receiverId = req.params.id;
 
+    if(!senderId || !receiverId){
+      logger.error(`${req.url} the userid or the groupid is not fetched`);
+      return res.status(404).json({"message":"Id are not found","success":false});
+  }
+
     //fetch the user first
     const fetchUser = await User.findById(receiverId);
     if (!fetchUser) {
+      logger.error(`${req.url} User not found`)
       return res.status(404).json({ "message": "User Not Found", "success": false });
     }
 
@@ -131,6 +150,7 @@ router.post('/create/:id', checkUser, async (req, res) => {
     })
 
     if (checkExistance) {
+      logger.error(`${req.url} chat already present`);
       return res.status(500).json({ "message": "Chat Already Present", "success": false });
     }
 
@@ -142,6 +162,7 @@ router.post('/create/:id', checkUser, async (req, res) => {
     createChat.save();
 
     if (!createChat) {
+      logger.error(`${req.url} chat not created`)
       return res.status(500).json({ "message": "Chat Not Created", "success": false });
     }
 
@@ -149,7 +170,7 @@ router.post('/create/:id', checkUser, async (req, res) => {
 
 
   } catch (error) {
-    console.error(`From /create ${error}`);
+    logger.error(`${req.url} ERROR:${error}`);
     return res.status(500).json({ "message": "Internal Server Error", "success": false });
   }
 })
