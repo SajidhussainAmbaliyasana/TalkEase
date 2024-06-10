@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const port = process.env.PORT || 8070;
+const port =  8070;
 const dotenv = require('dotenv');
 const cors = require('cors')
 require('./Database')

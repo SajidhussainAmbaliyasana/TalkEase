@@ -11,7 +11,7 @@ const checkUser = require('../middleware/CheckUser');
 const logger = require('../log/logger');
 
 
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = 's@jidhu$$@in';
 
 //multer
 const storage = multer.diskStorage({
