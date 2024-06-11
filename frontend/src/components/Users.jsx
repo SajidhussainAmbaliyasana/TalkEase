@@ -80,7 +80,7 @@ const Users = (props) => {
                         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                         variant="dot"
                     >
-                        <Avatar alt={props.name} src="/ss" sx={{ bgcolor: "#698562" }}/>
+                        <Avatar alt={props.name} src={`https://talkease-fy2k.onrender.com/uploads/${props.image}`} sx={{ bgcolor: "#698562" }}/>
                     </StyledBadge>):(<Avatar alt={props.name} src={`https://talkease-fy2k.onrender.com/uploads/${props.image}`} sx={{ bgcolor: "#698562" }}/>)}
                 </ListItemAvatar>
                 <ListItemText className='friend'>
