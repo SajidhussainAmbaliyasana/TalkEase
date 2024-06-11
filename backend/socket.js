@@ -23,7 +23,7 @@ let io; // Declare io variable outside the function
 function setupSocket(server) {
   io = new Server(server, {
     cors: {
-      origin: ["http://localhost:5173"],
+      origin: ["https://talkeasee.netlify.app"],
       methods: ["GET", "POST"]
     }
   });
